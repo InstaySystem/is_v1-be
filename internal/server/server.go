@@ -10,18 +10,22 @@ import (
 	"time"
 
 	"github.com/InstaySystem/is-be/internal/config"
+	"github.com/InstaySystem/is-be/internal/container"
 	"github.com/InstaySystem/is-be/internal/initialization"
+	"github.com/InstaySystem/is-be/internal/router"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 )
 
 type Server struct {
-	cfg  *config.Config
-	http *http.Server
-	db   *initialization.DB
-	rdb  *redis.Client
-	mq   *initialization.MQ
+	cfg    *config.Config
+	http   *http.Server
+	db     *initialization.DB
+	rdb    *redis.Client
+	mq     *initialization.MQ
+	logger *zap.Logger
 }
 
 func NewServer(cfg *config.Config) (*Server, error) {
@@ -40,6 +44,18 @@ func NewServer(cfg *config.Config) (*Server, error) {
 		return nil, err
 	}
 
+	s3, err := initialization.InitS3(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	logger, err := initialization.InitLogger()
+	if err != nil {
+		return nil, err
+	}
+
+	ctn := container.NewContainer(cfg, s3, logger)
+
 	r := gin.Default()
 	if err = r.SetTrustedProxies([]string{"127.0.0.1"}); err != nil {
 		return nil, fmt.Errorf("setup Proxy failed: %w", err)
@@ -56,7 +72,9 @@ func NewServer(cfg *config.Config) (*Server, error) {
 
 	r.Use(cors.New(corsConfig))
 
-	_ = r.Group(cfg.Server.APIPrefix)
+	api := r.Group(cfg.Server.APIPrefix)
+
+	router.FileRouter(api, ctn.FileContainer.Hdl)
 
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)
 
@@ -72,6 +90,7 @@ func NewServer(cfg *config.Config) (*Server, error) {
 		db,
 		rdb,
 		mq,
+		logger,
 	}, nil
 }
 
@@ -90,6 +109,10 @@ func (s *Server) Shutdown(ctx context.Context) {
 
 	if s.mq != nil {
 		s.mq.Close()
+	}
+
+	if s.logger != nil {
+		s.logger.Sync()
 	}
 
 	if s.http != nil {

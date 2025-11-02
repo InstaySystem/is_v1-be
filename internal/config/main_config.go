@@ -29,6 +29,14 @@ type Config struct {
 		SSLMode  string `mapstructure:"ssl_mode"`
 		DBName   string `mapstructure:"db_name"`
 	} `mapstructure:"postgresql"`
+
+	S3 struct {
+		Bucket          string `mapstructure:"bucket"`
+		Folder          string `mapstructure:"folder"`
+		AccessKeyID     string `mapstructure:"access_key_id"`
+		SecretAccessKey string `mapstructure:"secret_access_key"`
+		Region          string `mapstructure:"region"`
+	} `mapstructure:"s3"`
 }
 
 func LoadConfig() (*Config, error) {
