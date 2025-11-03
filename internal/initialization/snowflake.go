@@ -1,0 +1,24 @@
+package initialization
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/sony/sonyflake/v2"
+)
+
+func InitSnowFlake() (*sonyflake.Sonyflake, error) {
+	st := sonyflake.Settings{
+		StartTime: time.Date(2025, 11, 2, 0, 0, 0, 0, time.UTC),
+		MachineID: func() (int, error) {
+			return 1, nil
+		},
+	}
+
+	sf, err := sonyflake.New(st)
+	if err != nil {
+		return nil, fmt.Errorf("snowflake initialization failed: %w", err)
+	}
+
+	return sf, nil
+}

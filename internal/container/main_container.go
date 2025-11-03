@@ -3,14 +3,30 @@ package container
 import (
 	"github.com/InstaySystem/is-be/internal/config"
 	"github.com/InstaySystem/is-be/internal/initialization"
+	"github.com/InstaySystem/is-be/pkg/bcrypt"
+	"github.com/InstaySystem/is-be/pkg/snowflake"
+	"github.com/sony/sonyflake/v2"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 type Container struct {
-	FileContainer *FileContainer
+	FileCtn *FileContainer
+	AuthCtn *AuthContainer
+	UserCtn *UserContainer
 }
 
-func NewContainer(cfg *config.Config, s3 *initialization.S3, logger *zap.Logger) *Container {
+func NewContainer(cfg *config.Config, db *gorm.DB, s3 *initialization.S3, sf *sonyflake.Sonyflake, logger *zap.Logger) *Container {
+	sfGen := snowflake.NewGenerator(sf)
+	bHash := bcrypt.NewHasher(10)
+
 	fileCtn := NewFileContainer(cfg, s3, logger)
-	return &Container{fileCtn}
+	authCtn := NewAuthContainer(db)
+	userCtn := NewUserContainer(db, sfGen, logger, bHash)
+
+	return &Container{
+		fileCtn,
+		authCtn,
+		userCtn,
+	}
 }

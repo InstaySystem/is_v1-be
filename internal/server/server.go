@@ -49,12 +49,17 @@ func NewServer(cfg *config.Config) (*Server, error) {
 		return nil, err
 	}
 
+	sf, err := initialization.InitSnowFlake()
+	if err != nil {
+		return nil, err
+	}
+
 	logger, err := initialization.InitLogger()
 	if err != nil {
 		return nil, err
 	}
 
-	ctn := container.NewContainer(cfg, s3, logger)
+	ctn := container.NewContainer(cfg, db.Gorm, s3, sf, logger)
 
 	r := gin.Default()
 	if err = r.SetTrustedProxies([]string{"127.0.0.1"}); err != nil {
@@ -74,7 +79,8 @@ func NewServer(cfg *config.Config) (*Server, error) {
 
 	api := r.Group(cfg.Server.APIPrefix)
 
-	router.FileRouter(api, ctn.FileContainer.Hdl)
+	router.FileRouter(api, ctn.FileCtn.Hdl)
+	router.UserRouter(api, ctn.UserCtn.Hdl)
 
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)
 

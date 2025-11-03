@@ -25,7 +25,7 @@ func main() {
 		}
 	}()
 
-	log.Println("Server running successfully")
+	log.Printf("Server is running at: http://localhost:%d", cfg.Server.Port)
 
 	sv.GracefulShutdown(ch)
 }

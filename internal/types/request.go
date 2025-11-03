@@ -4,3 +4,12 @@ type PresignedURLRequest struct {
 	FileName    string `json:"file_name" binding:"required"`
 	ContentType string `json:"content_type" binding:"required"`
 }
+
+type CreateUserRequest struct {
+	Username    string     `json:"username" binding:"required,min=3"`
+	Email       string     `json:"email" binding:"required,email"`
+	Password    string     `json:"password" binding:"required,min=6"`
+	Role        string     `json:"role" binding:"required,oneof=receptionist housekeeper technician admin"`
+	FirstName   string     `json:"first_name" binding:"required"`
+	LastName    string     `json:"last_name" binding:"required"`
+}

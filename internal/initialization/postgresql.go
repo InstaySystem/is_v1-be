@@ -5,11 +5,14 @@ import (
 	"fmt"
 
 	"github.com/InstaySystem/is-be/internal/config"
+	"github.com/InstaySystem/is-be/internal/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-var allModels = []any{}
+var allModels = []any{
+	&model.User{},
+}
 
 type DB struct {
 	Gorm *gorm.DB

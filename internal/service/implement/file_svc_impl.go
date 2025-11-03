@@ -14,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type fileServiceImpl struct {
+type fileSvcImpl struct {
 	client    *s3.Client
 	presigner *s3.PresignClient
 	cfg       *config.Config
@@ -22,7 +22,7 @@ type fileServiceImpl struct {
 }
 
 func NewFileService(client *s3.Client, presigner *s3.PresignClient, cfg *config.Config, logger *zap.Logger) service.FileService {
-	return &fileServiceImpl{
+	return &fileSvcImpl{
 		client,
 		presigner,
 		cfg,
@@ -30,7 +30,7 @@ func NewFileService(client *s3.Client, presigner *s3.PresignClient, cfg *config.
 	}
 }
 
-func (s *fileServiceImpl) CreateUploadURL(ctx context.Context, req types.PresignedURLRequest) (string, error) {
+func (s *fileSvcImpl) CreateUploadURL(ctx context.Context, req types.PresignedURLRequest) (string, error) {
 	objectKey := fmt.Sprintf("%s/%s-%s", s.cfg.S3.Folder, uuid.New().String(), req.FileName)
 
 	presignedRes, err := s.presigner.PresignPutObject(ctx, &s3.PutObjectInput{

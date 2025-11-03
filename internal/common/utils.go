@@ -9,6 +9,7 @@ import (
 	"github.com/InstaySystem/is-be/internal/types"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func HandleValidationError(err error) string {
@@ -59,4 +60,15 @@ func ToAPIResponse(c *gin.Context, statusCode int, message string, data any) {
 		Message:    message,
 		Data:       data,
 	})
+}
+
+func IsUniqueViolation(err error) (bool, string) {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		if pgErr.Code == "23505" {
+			return true, pgErr.ConstraintName
+		}
+	}
+
+	return false, ""
 }

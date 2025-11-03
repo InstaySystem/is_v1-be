@@ -15,5 +15,6 @@ type FileContainer struct {
 func NewFileContainer(cfg *config.Config, s3 *initialization.S3, logger *zap.Logger) *FileContainer {
 	svc := svcImpl.NewFileService(s3.Client, s3.Presigner, cfg, logger)
 	hdl := handler.NewFileHandler(svc)
+	
 	return &FileContainer{hdl}
 }
