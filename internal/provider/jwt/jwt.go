@@ -11,7 +11,7 @@ import (
 type JWTProvider interface {
 	GenerateToken(userID int64, userRole string, ttl time.Duration) (string, error)
 
-	ParseToken(tokenStr string) (int64, string, error)
+	ParseToken(tokenStr string) (int64, string, int64, error)
 }
 
 type jwtProviderImpl struct {
@@ -34,7 +34,7 @@ func (j *jwtProviderImpl) GenerateToken(userID int64, userRole string, ttl time.
 	return token.SignedString([]byte(j.secret))
 }
 
-func (j *jwtProviderImpl) ParseToken(tokenStr string) (int64, string, error) {
+func (j *jwtProviderImpl) ParseToken(tokenStr string) (int64, string, int64, error) {
 	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("invalid signing method: %v", t.Header["alg"])
@@ -42,23 +42,28 @@ func (j *jwtProviderImpl) ParseToken(tokenStr string) (int64, string, error) {
 		return []byte(j.secret), nil
 	})
 	if err != nil || !token.Valid {
-		return 0, "", common.ErrInvalidToken
+		return 0, "", 0, common.ErrInvalidToken
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return 0, "", common.ErrInvalidToken
+		return 0, "", 0, common.ErrInvalidToken
 	}
 
 	idFloat, ok := claims["sub"].(float64)
 	if !ok {
-		return 0, "", common.ErrInvalidToken
+		return 0, "", 0, common.ErrInvalidToken
 	}
 
 	role, ok := claims["role"].(string)
 	if !ok {
-		return 0, "", common.ErrInvalidToken
+		return 0, "", 0, common.ErrInvalidToken
 	}
 
-	return int64(idFloat), role, nil
+	iatFloat, ok := claims["iat"].(float64)
+	if !ok {
+		return 0, "", 0, common.ErrInvalidToken
+	}
+
+	return int64(idFloat), role, int64(iatFloat), nil
 }

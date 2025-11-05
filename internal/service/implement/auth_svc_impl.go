@@ -287,7 +287,7 @@ func (s *authSvcImpl) UpdateInfo(ctx context.Context, userID int64, req types.Up
 					return nil, common.ErrPhoneAlreadyExists
 				}
 			}
-			s.logger.Error("update user failed", zap.Error(err))
+			s.logger.Error("update user failed", zap.Int64("id", userID), zap.Error(err))
 			return nil, err
 		}
 

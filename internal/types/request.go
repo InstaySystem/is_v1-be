@@ -41,6 +41,19 @@ type UpdateInfoRequest struct {
 	LastName  *string `json:"last_name" binding:"omitempty"`
 }
 
+type UpdateUserRequest struct {
+	Username  *string `json:"username" binding:"omitempty,min=5"`
+	Email     *string `json:"email" binding:"omitempty,email"`
+	Phone     *string `json:"phone" binding:"omitempty,len=10"`
+	FirstName *string `json:"first_name" binding:"omitempty"`
+	LastName  *string `json:"last_name" binding:"omitempty"`
+	Role      *string `json:"role" binding:"omitempty,oneof=receptionist housekeeper technician admin"`
+}
+
+type UpdateUserPasswordRequest struct {
+	NewPassword string `json:"new_password" binding:"required,min=6"`
+}
+
 type ResetPasswordRequest struct {
 	ResetPasswordToken string `json:"reset_password_token" binding:"required,uuid4"`
 	NewPassword        string `json:"new_password" binding:"required,min=6"`

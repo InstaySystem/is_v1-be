@@ -13,4 +13,8 @@ type UserService interface {
 	GetUserByID(ctx context.Context, id int64) (*model.User, error)
 
 	GetUsers(ctx context.Context, query types.UserPaginationQuery) ([]*model.User, *types.MetaResponse, error)
+
+	UpdateUser(ctx context.Context, id int64, req types.UpdateUserRequest) (*model.User, error)
+
+	UpdateUserPassword(ctx context.Context, id int64, req types.UpdateUserPasswordRequest) (*model.User, error)
 }

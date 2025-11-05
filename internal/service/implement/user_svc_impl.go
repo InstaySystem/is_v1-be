@@ -2,9 +2,13 @@ package implement
 
 import (
 	"context"
+	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/InstaySystem/is-be/internal/common"
 	"github.com/InstaySystem/is-be/internal/model"
+	"github.com/InstaySystem/is-be/internal/provider/cache"
 	"github.com/InstaySystem/is-be/internal/repository"
 	"github.com/InstaySystem/is-be/internal/service"
 	"github.com/InstaySystem/is-be/internal/types"
@@ -14,18 +18,29 @@ import (
 )
 
 type userSvcImpl struct {
-	userRepo repository.UserRepository
-	sfGen    snowflake.Generator
-	logger   *zap.Logger
-	bHash    bcrypt.Hasher
+	userRepo         repository.UserRepository
+	sfGen            snowflake.Generator
+	logger           *zap.Logger
+	bHash            bcrypt.Hasher
+	refreshExpiresIn time.Duration
+	cacheProvider    cache.CacheProvider
 }
 
-func NewUserService(userRepo repository.UserRepository, sfGen snowflake.Generator, logger *zap.Logger, bHash bcrypt.Hasher) service.UserService {
+func NewUserService(
+	userRepo repository.UserRepository,
+	sfGen snowflake.Generator,
+	logger *zap.Logger,
+	bHash bcrypt.Hasher,
+	refreshExpiresIn time.Duration,
+	cacheProvider cache.CacheProvider,
+) service.UserService {
 	return &userSvcImpl{
 		userRepo,
 		sfGen,
 		logger,
 		bHash,
+		refreshExpiresIn,
+		cacheProvider,
 	}
 }
 
@@ -113,4 +128,92 @@ func (s *userSvcImpl) GetUsers(ctx context.Context, query types.UserPaginationQu
 	}
 
 	return users, meta, nil
+}
+
+func (s *userSvcImpl) UpdateUser(ctx context.Context, id int64, req types.UpdateUserRequest) (*model.User, error) {
+	user, err := s.userRepo.FindByID(ctx, id)
+	if err != nil {
+		s.logger.Error("find user by id failed", zap.Int64("id", id), zap.Error(err))
+		return nil, err
+	}
+	if user == nil {
+		return nil, common.ErrUserNotFound
+	}
+
+	updateData := map[string]any{}
+
+	if req.Username != nil && *req.Username != user.Username {
+		updateData["username"] = req.Username
+	}
+	if req.Email != nil && *req.Email != user.Phone {
+		updateData["email"] = req.Email
+	}
+	if req.Phone != nil && *req.Phone != user.Phone {
+		updateData["phone"] = req.Phone
+	}
+	if req.FirstName != nil && *req.FirstName != user.FirstName {
+		updateData["first_name"] = req.FirstName
+	}
+	if req.LastName != nil && *req.LastName != user.LastName {
+		updateData["last_name"] = req.LastName
+	}
+	if req.Role != nil && *req.Role != user.Role {
+		updateData["role"] = req.Role
+	}
+
+	if len(updateData) > 0 {
+		if err = s.userRepo.Update(ctx, id, updateData); err != nil {
+			ok, constraint := common.IsUniqueViolation(err)
+			if ok {
+				switch constraint {
+				case "users_username_key":
+					return nil, common.ErrUsernameAlreadyExists
+				case "users_email_key":
+					return nil, common.ErrEmailAlreadyExists
+				case "users_phone_key":
+					return nil, common.ErrPhoneAlreadyExists
+				}
+			}
+			s.logger.Error("update user failed", zap.Int64("id", id), zap.Error(err))
+			return nil, err
+		}
+
+		user, _ = s.userRepo.FindByID(ctx, id)
+	}
+
+	return user, nil
+}
+
+func (s *userSvcImpl) UpdateUserPassword(ctx context.Context, id int64, req types.UpdateUserPasswordRequest) (*model.User, error) {
+	user, err := s.userRepo.FindByID(ctx, id)
+	if err != nil {
+		s.logger.Error("find user by id failed", zap.Int64("id", id), zap.Error(err))
+		return nil, err
+	}
+	if user == nil {
+		return nil, common.ErrUserNotFound
+	}
+
+	hashedPass, err := s.bHash.HashPassword(req.NewPassword)
+	if err != nil {
+		s.logger.Error("hash password failed", zap.Error(err))
+		return nil, err
+	}
+
+	if err = s.userRepo.Update(ctx, id, map[string]any{"password": hashedPass}); err != nil {
+		s.logger.Error("update user failed", zap.Int64("id", id), zap.Error(err))
+		return nil, err
+	}
+
+	if user.Role != common.RoleAdmin {
+		currentTime := time.Now().Unix()
+		currentTimeStr := strconv.FormatInt(currentTime, 10)
+		redisKey := fmt.Sprintf("user-revoked-before:%d", id)
+		if err = s.cacheProvider.SetString(ctx, redisKey, currentTimeStr, s.refreshExpiresIn); err != nil {
+			s.logger.Error("set revocation key after password reset failed", zap.Error(err))
+			return nil, err
+		}
+	}
+
+	return user, nil
 }

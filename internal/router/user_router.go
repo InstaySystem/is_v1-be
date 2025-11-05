@@ -16,5 +16,9 @@ func UserRouter(rg *gin.RouterGroup, hdl *handler.UserHandler, authMid *middlewa
 		user.GET("", authMid.HasAnyRole([]string{"admin"}), hdl.GetUsers)
 
 		user.GET("/roles", authMid.HasAnyRole([]string{"admin"}), hdl.GetAllRoles)
+
+		user.PATCH("/:id", authMid.HasAnyRole([]string{"admin"}), hdl.UpdateUser)
+
+		user.PUT("/:id/password", authMid.HasAnyRole([]string{"admin"}), hdl.UpdateUserPassword)
 	}
 }

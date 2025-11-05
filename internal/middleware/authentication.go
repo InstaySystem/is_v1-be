@@ -2,11 +2,14 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"slices"
+	"strconv"
 	"time"
 
 	"github.com/InstaySystem/is-be/internal/common"
+	"github.com/InstaySystem/is-be/internal/provider/cache"
 	"github.com/InstaySystem/is-be/internal/provider/jwt"
 	"github.com/InstaySystem/is-be/internal/repository"
 	"github.com/InstaySystem/is-be/internal/types"
@@ -15,11 +18,12 @@ import (
 )
 
 type AuthMiddleware struct {
-	accessName  string
-	refreshName string
-	userRepo    repository.UserRepository
-	jwtProvider jwt.JWTProvider
-	logger      *zap.Logger
+	accessName    string
+	refreshName   string
+	userRepo      repository.UserRepository
+	jwtProvider   jwt.JWTProvider
+	logger        *zap.Logger
+	cacheProvider cache.CacheProvider
 }
 
 func NewAuthMiddleware(
@@ -27,6 +31,7 @@ func NewAuthMiddleware(
 	userRepo repository.UserRepository,
 	jwtProvider jwt.JWTProvider,
 	logger *zap.Logger,
+	cacheProvider cache.CacheProvider,
 ) *AuthMiddleware {
 	return &AuthMiddleware{
 		accessName,
@@ -34,6 +39,7 @@ func NewAuthMiddleware(
 		userRepo,
 		jwtProvider,
 		logger,
+		cacheProvider,
 	}
 }
 
@@ -47,9 +53,9 @@ func (m *AuthMiddleware) IsAuthentication() gin.HandlerFunc {
 			return
 		}
 
-		userID, userRole, err := m.jwtProvider.ParseToken(accessToken)
+		userID, userRole, issuedAt, err := m.jwtProvider.ParseToken(accessToken)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, types.APIResponse{
+			c.AbortWithStatusJSON(http.StatusForbidden, types.APIResponse{
 				Message: err.Error(),
 			})
 			return
@@ -57,6 +63,25 @@ func (m *AuthMiddleware) IsAuthentication() gin.HandlerFunc {
 
 		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 		defer cancel()
+
+		revocationKey := fmt.Sprintf("user-revoked-before:%d", userID)
+		revokedTimestampStr, err := m.cacheProvider.GetString(c.Request.Context(), revocationKey)
+		if err != nil {
+			m.logger.Error("get revocation key from cache failed", zap.String("key", revocationKey), zap.Error(err))
+			c.AbortWithStatusJSON(http.StatusInternalServerError, types.APIResponse{
+				Message: "internal server error",
+			})
+			return
+		}
+		if revokedTimestampStr != "" {
+			revokedTimestamp, _ := strconv.ParseInt(revokedTimestampStr, 10, 64)
+			if issuedAt < revokedTimestamp {
+				c.AbortWithStatusJSON(http.StatusForbidden, types.APIResponse{
+					Message: common.ErrInvalidToken.Error(),
+				})
+				return
+			}
+		}
 
 		user, err := m.userRepo.FindByID(ctx, userID)
 		if err != nil {
@@ -67,14 +92,14 @@ func (m *AuthMiddleware) IsAuthentication() gin.HandlerFunc {
 			return
 		}
 		if user == nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, types.APIResponse{
+			c.AbortWithStatusJSON(http.StatusForbidden, types.APIResponse{
 				Message: common.ErrUserNotFound.Error(),
 			})
 			return
 		}
 
 		if user.Role != userRole {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, types.APIResponse{
+			c.AbortWithStatusJSON(http.StatusForbidden, types.APIResponse{
 				Message: common.ErrInvalidUser.Error(),
 			})
 			return
@@ -120,9 +145,9 @@ func (m *AuthMiddleware) HasRefreshToken() gin.HandlerFunc {
 			return
 		}
 
-		userID, userRole, err := m.jwtProvider.ParseToken(refreshToken)
+		userID, userRole, issuedAt, err := m.jwtProvider.ParseToken(refreshToken)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, types.APIResponse{
+			c.AbortWithStatusJSON(http.StatusForbidden, types.APIResponse{
 				Message: err.Error(),
 			})
 			return
@@ -130,6 +155,25 @@ func (m *AuthMiddleware) HasRefreshToken() gin.HandlerFunc {
 
 		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 		defer cancel()
+
+		revocationKey := fmt.Sprintf("user-revoked-before:%d", userID)
+		revokedTimestampStr, err := m.cacheProvider.GetString(c.Request.Context(), revocationKey)
+		if err != nil {
+			m.logger.Error("get revocation key from cache failed", zap.String("key", revocationKey), zap.Error(err))
+			c.AbortWithStatusJSON(http.StatusInternalServerError, types.APIResponse{
+				Message: "internal server error",
+			})
+			return
+		}
+		if revokedTimestampStr != "" {
+			revokedTimestamp, _ := strconv.ParseInt(revokedTimestampStr, 10, 64)
+			if issuedAt < revokedTimestamp {
+				c.AbortWithStatusJSON(http.StatusForbidden, types.APIResponse{
+					Message: common.ErrInvalidToken.Error(),
+				})
+				return
+			}
+		}
 
 		user, err := m.userRepo.FindByID(ctx, userID)
 		if err != nil {
@@ -140,14 +184,14 @@ func (m *AuthMiddleware) HasRefreshToken() gin.HandlerFunc {
 			return
 		}
 		if user == nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, types.APIResponse{
+			c.AbortWithStatusJSON(http.StatusForbidden, types.APIResponse{
 				Message: common.ErrUserNotFound.Error(),
 			})
 			return
 		}
 
 		if user.Role != userRole {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, types.APIResponse{
+			c.AbortWithStatusJSON(http.StatusForbidden, types.APIResponse{
 				Message: common.ErrInvalidUser.Error(),
 			})
 			return
@@ -155,7 +199,7 @@ func (m *AuthMiddleware) HasRefreshToken() gin.HandlerFunc {
 
 		c.Set("user_id", user.ID)
 		c.Set("user_role", user.Role)
-		
+
 		c.Next()
 	}
 }

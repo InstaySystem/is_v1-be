@@ -1,7 +1,10 @@
 package container
 
 import (
+	"time"
+
 	"github.com/InstaySystem/is-be/internal/handler"
+	"github.com/InstaySystem/is-be/internal/provider/cache"
 	"github.com/InstaySystem/is-be/internal/repository"
 	repoImpl "github.com/InstaySystem/is-be/internal/repository/implement"
 	svcImpl "github.com/InstaySystem/is-be/internal/service/implement"
@@ -21,9 +24,11 @@ func NewUserContainer(
 	sfGen snowflake.Generator,
 	logger *zap.Logger,
 	bHash bcrypt.Hasher,
+	refreshExpiresIn time.Duration,
+	cacheProvider cache.CacheProvider,
 ) *UserContainer {
 	repo := repoImpl.NewUserRepository(db)
-	svc := svcImpl.NewUserService(repo, sfGen, logger, bHash)
+	svc := svcImpl.NewUserService(repo, sfGen, logger, bHash, refreshExpiresIn, cacheProvider)
 	hdl := handler.NewUserHandler(svc)
 
 	return &UserContainer{

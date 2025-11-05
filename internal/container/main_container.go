@@ -45,9 +45,9 @@ func NewContainer(
 
 	fileCtn := NewFileContainer(cfg, s3, logger)
 	authCtn := NewAuthContainer(cfg, db, logger, bHash, jwtProvider, cacheProvider, mqProvider)
-	userCtn := NewUserContainer(db, sfGen, logger, bHash)
+	userCtn := NewUserContainer(db, sfGen, logger, bHash, cfg.JWT.RefreshExpiresIn, cacheProvider)
 
-	authMid := middleware.NewAuthMiddleware(cfg.JWT.AccessName, cfg.JWT.RefreshName, userCtn.Repo, jwtProvider, logger)
+	authMid := middleware.NewAuthMiddleware(cfg.JWT.AccessName, cfg.JWT.RefreshName, userCtn.Repo, jwtProvider, logger, cacheProvider)
 
 	return &Container{
 		fileCtn,
