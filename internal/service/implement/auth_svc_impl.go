@@ -104,7 +104,7 @@ func (s *authSvcImpl) ChangePassword(ctx context.Context, userID int64, req type
 		return err
 	}
 	if user == nil {
-		return common.ErrUnAuth
+		return common.ErrUserNotFound
 	}
 
 	if err = s.bHash.VerifyPassword(req.OldPassword, user.Password); err != nil {
@@ -249,6 +249,52 @@ func (s *authSvcImpl) ResetPassword(ctx context.Context, req types.ResetPassword
 	}
 
 	return nil
+}
+
+func (s *authSvcImpl) UpdateInfo(ctx context.Context, userID int64, req types.UpdateInfoRequest) (*model.User, error) {
+	user, err := s.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		s.logger.Error("find user by id failed", zap.Int64("id", userID), zap.Error(err))
+		return nil, err
+	}
+	if user == nil {
+		return nil, common.ErrUserNotFound
+	}
+
+	updateData := map[string]any{}
+
+	if req.Email != nil && *req.Email != user.Phone {
+		updateData["email"] = req.Email
+	}
+	if req.Phone != nil && *req.Phone != user.Phone {
+		updateData["phone"] = req.Phone
+	}
+	if req.FirstName != nil && *req.FirstName != user.FirstName {
+		updateData["first_name"] = req.FirstName
+	}
+	if req.LastName != nil && *req.LastName != user.LastName {
+		updateData["last_name"] = req.LastName
+	}
+
+	if len(updateData) > 0 {
+		if err = s.userRepo.Update(ctx, userID, updateData); err != nil {
+			ok, constraint := common.IsUniqueViolation(err)
+			if ok {
+				switch constraint {
+				case "users_email_key":
+					return nil, common.ErrEmailAlreadyExists
+				case "users_phone_key":
+					return nil, common.ErrPhoneAlreadyExists
+				}
+			}
+			s.logger.Error("update user failed", zap.Error(err))
+			return nil, err
+		}
+
+		user, _ = s.userRepo.FindByID(ctx, userID)
+	}
+
+	return user, nil
 }
 
 func generateOTP(length uint8) string {

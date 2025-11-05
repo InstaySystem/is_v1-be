@@ -225,3 +225,44 @@ func (h *AuthHandler) ResetPassword(c *gin.Context) {
 
 	common.ToAPIResponse(c, http.StatusOK, "Password reset successful", nil)
 }
+
+func (h *AuthHandler) UpdateInfo(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	var req types.UpdateInfoRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		mess := common.HandleValidationError(err)
+		common.ToAPIResponse(c, http.StatusBadRequest, mess, nil)
+		return
+	}
+
+	userAny, exists := c.Get("user")
+	if !exists {
+		common.ToAPIResponse(c, http.StatusUnauthorized, common.ErrUnAuth.Error(), nil)
+		return
+	}
+
+	user, ok := userAny.(*types.UserData)
+	if !ok {
+		common.ToAPIResponse(c, http.StatusUnauthorized, common.ErrInvalidUser.Error(), nil)
+		return
+	}
+
+	updatedUser, err := h.authSvc.UpdateInfo(ctx, user.ID, req)
+	if err != nil {
+		switch err {
+		case common.ErrEmailAlreadyExists, common.ErrPhoneAlreadyExists:
+			common.ToAPIResponse(c, http.StatusConflict, err.Error(), nil)
+		case common.ErrUserNotFound:
+			common.ToAPIResponse(c, http.StatusNotFound, err.Error(), nil)
+		default:
+			common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
+		}
+		return
+	}
+
+	common.ToAPIResponse(c, http.StatusOK, "User updated successfully", gin.H{
+		"user": common.ToUserResponse(updatedUser),
+	})
+}

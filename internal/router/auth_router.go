@@ -24,5 +24,7 @@ func AuthRouter(rg *gin.RouterGroup, hdl *handler.AuthHandler, authMid *middlewa
 		auth.POST("/forgot-password/verify", hdl.VerifyForgotPassword)
 
 		auth.POST("/reset-password", hdl.ResetPassword)
+
+		auth.POST("/update-info", authMid.IsAuthentication(), hdl.UpdateInfo)
 	}
 } 

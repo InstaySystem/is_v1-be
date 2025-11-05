@@ -8,6 +8,7 @@ type PresignedURLRequest struct {
 type CreateUserRequest struct {
 	Username  string `json:"username" binding:"required,min=5"`
 	Email     string `json:"email" binding:"required,email"`
+	Phone     string `json:"phone" binding:"required,len=10"`
 	Password  string `json:"password" binding:"required,min=6"`
 	Role      string `json:"role" binding:"required,oneof=receptionist housekeeper technician admin"`
 	FirstName string `json:"first_name" binding:"required"`
@@ -31,6 +32,13 @@ type ForgotPasswordRequest struct {
 type VerifyForgotPasswordRequest struct {
 	ForgotPasswordToken string `json:"forgot_password_token" binding:"required,uuid4"`
 	Otp                 string `json:"otp" binding:"required,len=6,numeric"`
+}
+
+type UpdateInfoRequest struct {
+	Email     *string `json:"email" binding:"omitempty,email"`
+	Phone     *string `json:"phone" binding:"omitempty,len=10"`
+	FirstName *string `json:"first_name" binding:"omitempty"`
+	LastName  *string `json:"last_name" binding:"omitempty"`
 }
 
 type ResetPasswordRequest struct {

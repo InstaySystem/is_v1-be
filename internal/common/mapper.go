@@ -9,6 +9,7 @@ func ToUserResponse(user *model.User) *types.UserResponse {
 	return &types.UserResponse{
 		ID:        user.ID,
 		Email:     user.Email,
+		Phone:     user.Phone,
 		Username:  user.Username,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
@@ -22,6 +23,7 @@ func ToUserData(user *model.User) *types.UserData {
 		ID:        user.ID,
 		Email:     user.Email,
 		Username:  user.Username,
+		Phone:     user.Phone,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Role:      user.Role,
@@ -55,6 +57,6 @@ func ToSimpleUsersResponse(users []*model.User) []*types.SimpleUserResponse {
 func ToUserListResponse(users []*model.User, meta *types.MetaResponse) *types.UserListResponse {
 	return &types.UserListResponse{
 		Users: ToSimpleUsersResponse(users),
-		Meta: meta,
+		Meta:  meta,
 	}
 }

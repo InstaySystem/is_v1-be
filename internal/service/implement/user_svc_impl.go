@@ -60,6 +60,8 @@ func (s *userSvcImpl) CreateUser(ctx context.Context, req types.CreateUserReques
 				return 0, common.ErrEmailAlreadyExists
 			case "users_username_key":
 				return 0, common.ErrUsernameAlreadyExists
+			case "users_phone_key":
+				return 0, common.ErrPhoneAlreadyExists
 			}
 		}
 		s.logger.Error("create user failed", zap.Error(err))

@@ -14,5 +14,7 @@ func UserRouter(rg *gin.RouterGroup, hdl *handler.UserHandler, authMid *middlewa
 		user.GET("/:id", authMid.HasAnyRole([]string{"admin"}), hdl.GetUserByID)
 
 		user.GET("", authMid.HasAnyRole([]string{"admin"}), hdl.GetUsers)
+
+		user.GET("/roles", authMid.HasAnyRole([]string{"admin"}), hdl.GetAllRoles)
 	}
 }

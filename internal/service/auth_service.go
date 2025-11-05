@@ -19,4 +19,6 @@ type AuthService interface {
 	VerifyForgotPassword(ctx context.Context, req types.VerifyForgotPasswordRequest) (string, error)
 
 	ResetPassword(ctx context.Context, req types.ResetPasswordRequest) error
+
+	UpdateInfo(ctx context.Context, userID int64, req types.UpdateInfoRequest) (*model.User, error)
 }

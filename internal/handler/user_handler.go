@@ -34,7 +34,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	id, err := h.userSvc.CreateUser(ctx, req)
 	if err != nil {
 		switch err {
-		case common.ErrEmailAlreadyExists, common.ErrUsernameAlreadyExists:
+		case common.ErrEmailAlreadyExists, common.ErrUsernameAlreadyExists, common.ErrPhoneAlreadyExists:
 			common.ToAPIResponse(c, http.StatusConflict, err.Error(), nil)
 		default:
 			common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
@@ -92,4 +92,17 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 	}
 
 	common.ToAPIResponse(c, http.StatusOK, "Get user list successfully", common.ToUserListResponse(users, meta))
+}
+
+func (h *UserHandler) GetAllRoles(c *gin.Context) {
+	rolesMap := map[string]string{
+		common.RoleAdminDisplayName: common.RoleAdmin,
+		common.RoleReceptionistDisplayName: common.RoleReceptionist,
+		common.RoleHousekeeperDisplayName: common.RoleHousekeeper,
+		common.RoleTechnicianDisplayName: common.RoleTechnician,
+	}
+
+	common.ToAPIResponse(c, http.StatusOK, "Get all roles successfully", gin.H{
+		"roles": rolesMap,
+	})
 }
