@@ -103,6 +103,19 @@ func (r *userRepoImpl) FindAllPaginated(ctx context.Context, query types.UserPag
 	return users, total, nil
 }
 
+func (r *userRepoImpl) Delete(ctx context.Context, id int64) error {
+	result := r.db.WithContext(ctx).Where("id = ?", id).Delete(&model.User{})
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return common.ErrUserNotFound
+	}
+
+	return nil
+}
+
 func applyFilters(db *gorm.DB, query types.UserPaginationQuery) *gorm.DB {
 	if query.Search != "" {
 		searchTerm := "%" + strings.ToLower(query.Search) + "%"

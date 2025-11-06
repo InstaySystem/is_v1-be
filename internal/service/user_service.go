@@ -17,4 +17,6 @@ type UserService interface {
 	UpdateUser(ctx context.Context, id int64, req types.UpdateUserRequest) (*model.User, error)
 
 	UpdateUserPassword(ctx context.Context, id int64, req types.UpdateUserPasswordRequest) (*model.User, error)
+
+	DeleteUser(ctx context.Context, id int64) error
 }

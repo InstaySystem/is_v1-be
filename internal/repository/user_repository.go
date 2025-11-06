@@ -21,4 +21,6 @@ type UserRepository interface {
 	ExistsByEmail(ctx context.Context, email string) (bool, error)
 
 	FindAllPaginated(ctx context.Context, query types.UserPaginationQuery) ([]*model.User, int64, error)
+
+	Delete(ctx context.Context, id int64) error
 }

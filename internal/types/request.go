@@ -67,3 +67,7 @@ type UserPaginationQuery struct {
 	Role   string `form:"role" binding:"omitempty,oneof=admin technician receptionist housekeeper" json:"role"`
 	Search string `form:"search" json:"search"`
 }
+
+type DeleteManyRequest struct {
+	IDs []int64 `json:"ids" binding:"required,min=1,dive"`
+}

@@ -163,7 +163,12 @@ func (h *UserHandler) UpdateUserPassword(c *gin.Context) {
 
 	updatedUser, err := h.userSvc.UpdateUserPassword(ctx, userID, req)
 	if err != nil {
-		common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
+		switch err {
+		case common.ErrUserNotFound:
+			common.ToAPIResponse(c, http.StatusNotFound, err.Error(), nil)
+		default:
+			common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
+		}
 		return
 	}
 
@@ -171,3 +176,30 @@ func (h *UserHandler) UpdateUserPassword(c *gin.Context) {
 		"user": common.ToUserResponse(updatedUser),
 	})
 }
+
+func (h *UserHandler) DeleteUser(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	userIDStr := c.Param("id")
+	userID, err := strconv.ParseInt(userIDStr, 10, 64)
+	if err != nil {
+		common.ToAPIResponse(c, http.StatusBadRequest, common.ErrInvalidID.Error(), nil)
+		return
+	}
+
+	if err := h.userSvc.DeleteUser(ctx, userID); err != nil {
+		switch err {
+		case common.ErrUserNotFound:
+			common.ToAPIResponse(c, http.StatusNotFound, err.Error(), nil)
+		case common.ErrProtectedRecord:
+			common.ToAPIResponse(c, http.StatusConflict, err.Error(), nil)
+		default:
+			common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
+		}
+		return
+	}
+
+	common.ToAPIResponse(c, http.StatusOK, "User deleted successfully", nil)
+}
+

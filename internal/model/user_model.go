@@ -13,4 +13,7 @@ type User struct {
 	Password  string    `gorm:"type:varchar(255);not null" json:"password"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+
+	ServicesCreated []*Service `gorm:"foreignKey:CreatedByID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT" json:"services_created"`
+	ServicesUpdated []*Service `gorm:"foreignKey:UpdatedByID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT" json:"services_updated"`
 }

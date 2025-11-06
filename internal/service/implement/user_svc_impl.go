@@ -2,6 +2,7 @@ package implement
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -216,4 +217,19 @@ func (s *userSvcImpl) UpdateUserPassword(ctx context.Context, id int64, req type
 	}
 
 	return user, nil
+}
+
+func (s *userSvcImpl) DeleteUser(ctx context.Context, id int64) error {
+	if err := s.userRepo.Delete(ctx, id); err != nil {
+		if errors.Is(err, common.ErrUserNotFound) {
+			return err
+		}
+		if common.IsForeignKeyViolation(err) {
+			return common.ErrProtectedRecord
+		}
+		s.logger.Error("delete user failed", zap.Int64("id", id), zap.Error(err))
+		return err
+	}
+
+	return nil
 }

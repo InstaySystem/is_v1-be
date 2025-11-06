@@ -28,4 +28,6 @@ var (
 	ErrInvalidOTP = errors.New("invalid or expired OTP")
 
 	ErrInvalidID = errors.New("invalid ID")
+
+	ErrProtectedRecord = errors.New("record related to other records, cannot be deleted")
 )
