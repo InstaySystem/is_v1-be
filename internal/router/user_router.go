@@ -7,20 +7,20 @@ import (
 )
 
 func UserRouter(rg *gin.RouterGroup, hdl *handler.UserHandler, authMid *middleware.AuthMiddleware) {
-	user := rg.Group("/users", authMid.IsAuthentication())
+	user := rg.Group("/users", authMid.IsAuthentication(), authMid.HasAnyRole([]string{"admin"}))
 	{
-		user.POST("", authMid.HasAnyRole([]string{"admin"}), hdl.CreateUser)
+		user.POST("", hdl.CreateUser)
 
-		user.GET("/:id", authMid.HasAnyRole([]string{"admin"}), hdl.GetUserByID)
+		user.GET("/:id", hdl.GetUserByID)
 
-		user.GET("", authMid.HasAnyRole([]string{"admin"}), hdl.GetUsers)
+		user.GET("", hdl.GetUsers)
 
-		user.GET("/roles", authMid.HasAnyRole([]string{"admin"}), hdl.GetAllRoles)
+		user.GET("/roles", hdl.GetAllRoles)
 
-		user.PATCH("/:id", authMid.HasAnyRole([]string{"admin"}), hdl.UpdateUser)
+		user.PATCH("/:id", hdl.UpdateUser)
 
-		user.PUT("/:id/password", authMid.HasAnyRole([]string{"admin"}), hdl.UpdateUserPassword)
+		user.PUT("/:id/password", hdl.UpdateUserPassword)
 
-		user.DELETE("/:id", authMid.HasAnyRole([]string{"admin"}), hdl.DeleteUser)
+		user.DELETE("/:id", hdl.DeleteUser)
 	}
 }

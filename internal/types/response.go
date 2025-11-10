@@ -13,6 +13,7 @@ type UserResponse struct {
 	Email     string    `json:"email"`
 	Phone     string    `json:"phone"`
 	Role      string    `json:"role"`
+	IsActive  bool      `json:"is_active"`
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
 	CreatedAt time.Time `json:"created_at"`
@@ -23,6 +24,7 @@ type SimpleUserResponse struct {
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
 	Role      string    `json:"role"`
+	IsActive  bool      `json:"is_active"`
 	CreatedAt time.Time `json:"created_at"`
 }
 

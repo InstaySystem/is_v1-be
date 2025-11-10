@@ -8,6 +8,7 @@ type UserData struct {
 	Email     string    `json:"email"`
 	Phone     string    `json:"phone"`
 	Role      string    `json:"role"`
+	IsActive  bool      `json:"is_active"`
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
 	CreatedAt time.Time `json:"created_at"`

@@ -66,6 +66,7 @@ func (s *userSvcImpl) CreateUser(ctx context.Context, req types.CreateUserReques
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Role:      req.Role,
+		IsActive:  req.IsActive,
 	}
 
 	if err = s.userRepo.Create(ctx, user); err != nil {
@@ -160,6 +161,22 @@ func (s *userSvcImpl) UpdateUser(ctx context.Context, id int64, req types.Update
 	}
 	if req.Role != nil && *req.Role != user.Role {
 		updateData["role"] = req.Role
+	}
+	if req.IsActive != nil && *req.IsActive != user.IsActive {
+		updateData["is_active"] = req.IsActive
+	}
+
+	if req.Role != nil && *req.Role != user.Role || req.IsActive != nil && *req.IsActive != user.IsActive {
+		if user.Role == "admin" && user.IsActive {
+			count, err := s.userRepo.CountActiveAdminExceptID(ctx, user.ID)
+			if err != nil {
+				s.logger.Error("count active admin failed", zap.Error(err))
+				return nil, err
+			}
+			if count == 0 {
+				return nil, common.ErrNeedAdmin
+			}
+		}
 	}
 
 	if len(updateData) > 0 {

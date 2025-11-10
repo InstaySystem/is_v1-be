@@ -23,4 +23,6 @@ type UserRepository interface {
 	FindAllPaginated(ctx context.Context, query types.UserPaginationQuery) ([]*model.User, int64, error)
 
 	Delete(ctx context.Context, id int64) error
+
+	CountActiveAdminExceptID(ctx context.Context, id int64) (int64, error)
 }

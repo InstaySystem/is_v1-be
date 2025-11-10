@@ -14,6 +14,7 @@ func ToUserResponse(user *model.User) *types.UserResponse {
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Role:      user.Role,
+		IsActive: user.IsActive,
 		CreatedAt: user.CreatedAt,
 	}
 }
@@ -27,6 +28,7 @@ func ToUserData(user *model.User) *types.UserData {
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Role:      user.Role,
+		IsActive: user.IsActive,
 		CreatedAt: user.CreatedAt,
 	}
 }
@@ -37,6 +39,7 @@ func ToSimpleUserResponse(user *model.User) *types.SimpleUserResponse {
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Role:      user.Role,
+		IsActive: user.IsActive,
 		CreatedAt: user.CreatedAt,
 	}
 }

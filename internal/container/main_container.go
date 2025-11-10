@@ -18,12 +18,13 @@ import (
 )
 
 type Container struct {
-	FileCtn      *FileContainer
-	AuthCtn      *AuthContainer
-	UserCtn      *UserContainer
-	AuthMid      *middleware.AuthMiddleware
-	SMTPProvider smtp.SMTPProvider
-	MQProvider   mq.MessageQueueProvider
+	FileCtn       *FileContainer
+	AuthCtn       *AuthContainer
+	UserCtn       *UserContainer
+	DepartmentCtn *DepartmentContainer
+	AuthMid       *middleware.AuthMiddleware
+	SMTPProvider  smtp.SMTPProvider
+	MQProvider    mq.MessageQueueProvider
 }
 
 func NewContainer(
@@ -46,6 +47,7 @@ func NewContainer(
 	fileCtn := NewFileContainer(cfg, s3, logger)
 	authCtn := NewAuthContainer(cfg, db, logger, bHash, jwtProvider, cacheProvider, mqProvider)
 	userCtn := NewUserContainer(db, sfGen, logger, bHash, cfg.JWT.RefreshExpiresIn, cacheProvider)
+	departmentCtn := NewDepartmentContainer(db, sfGen, logger)
 
 	authMid := middleware.NewAuthMiddleware(cfg.JWT.AccessName, cfg.JWT.RefreshName, userCtn.Repo, jwtProvider, logger, cacheProvider)
 
@@ -53,6 +55,7 @@ func NewContainer(
 		fileCtn,
 		authCtn,
 		userCtn,
+		departmentCtn,
 		authMid,
 		smtpProvider,
 		mqProvider,

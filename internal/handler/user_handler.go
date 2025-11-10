@@ -132,6 +132,8 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 			common.ToAPIResponse(c, http.StatusConflict, err.Error(), nil)
 		case common.ErrUserNotFound:
 			common.ToAPIResponse(c, http.StatusNotFound, err.Error(), nil)
+		case common.ErrNeedAdmin:
+			common.ToAPIResponse(c, http.StatusBadRequest, err.Error(), nil)
 		default:
 			common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
 		}
@@ -202,4 +204,3 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 
 	common.ToAPIResponse(c, http.StatusOK, "User deleted successfully", nil)
 }
-

@@ -98,6 +98,13 @@ func (m *AuthMiddleware) IsAuthentication() gin.HandlerFunc {
 			return
 		}
 
+		if !user.IsActive {
+			c.AbortWithStatusJSON(http.StatusForbidden, types.APIResponse{
+				Message: common.ErrInvalidUser.Error(),
+			})
+			return
+		}
+
 		if user.Role != userRole {
 			c.AbortWithStatusJSON(http.StatusForbidden, types.APIResponse{
 				Message: common.ErrInvalidUser.Error(),
@@ -186,6 +193,13 @@ func (m *AuthMiddleware) HasRefreshToken() gin.HandlerFunc {
 		if user == nil {
 			c.AbortWithStatusJSON(http.StatusForbidden, types.APIResponse{
 				Message: common.ErrUserNotFound.Error(),
+			})
+			return
+		}
+
+		if !user.IsActive {
+			c.AbortWithStatusJSON(http.StatusForbidden, types.APIResponse{
+				Message: common.ErrInvalidUser.Error(),
 			})
 			return
 		}

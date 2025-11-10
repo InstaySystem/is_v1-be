@@ -62,6 +62,10 @@ func (s *authSvcImpl) Login(ctx context.Context, req types.LoginRequest) (*model
 		return nil, "", "", common.ErrLoginFailed
 	}
 
+	if !user.IsActive {
+		return nil, "", "", common.ErrLoginFailed
+	}
+
 	if err = s.bHash.VerifyPassword(req.Password, user.Password); err != nil {
 		return nil, "", "", common.ErrLoginFailed
 	}

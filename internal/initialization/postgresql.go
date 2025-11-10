@@ -12,6 +12,7 @@ import (
 
 var allModels = []any{
 	&model.User{},
+	&model.Department{},
 }
 
 type DB struct {

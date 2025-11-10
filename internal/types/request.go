@@ -10,9 +10,16 @@ type CreateUserRequest struct {
 	Email     string `json:"email" binding:"required,email"`
 	Phone     string `json:"phone" binding:"required,len=10"`
 	Password  string `json:"password" binding:"required,min=6"`
-	Role      string `json:"role" binding:"required,oneof=receptionist housekeeper technician admin"`
+	Role      string `json:"role" binding:"required,oneof=staff admin"`
+	IsActive  bool   `json:"is_active" binding:"required"`
 	FirstName string `json:"first_name" binding:"required"`
 	LastName  string `json:"last_name" binding:"required"`
+}
+
+type CreateDepartmentRequest struct {
+	Name        string `json:"name" binding:"required,min=2"`
+	DisplayName string `json:"display_name" binding:"required,min=2"`
+	Description string `json:"description" binding:"required"`
 }
 
 type LoginRequest struct {
@@ -47,7 +54,8 @@ type UpdateUserRequest struct {
 	Phone     *string `json:"phone" binding:"omitempty,len=10"`
 	FirstName *string `json:"first_name" binding:"omitempty"`
 	LastName  *string `json:"last_name" binding:"omitempty"`
-	Role      *string `json:"role" binding:"omitempty,oneof=receptionist housekeeper technician admin"`
+	Role      *string `json:"role" binding:"omitempty,oneof=staff admin"`
+	IsActive  *bool   `json:"is_active" binding:"omitempty"`
 }
 
 type UpdateUserPasswordRequest struct {
@@ -64,7 +72,7 @@ type UserPaginationQuery struct {
 	Limit  uint32 `form:"limit" binding:"omitempty,min=1,max=100" json:"limit"`
 	Sort   string `form:"sort" json:"sort"`
 	Order  string `form:"order" binding:"omitempty,oneof=asc desc" json:"order"`
-	Role   string `form:"role" binding:"omitempty,oneof=admin technician receptionist housekeeper" json:"role"`
+	Role   string `form:"role" binding:"omitempty,oneof=admin staff" json:"role"`
 	Search string `form:"search" json:"search"`
 }
 

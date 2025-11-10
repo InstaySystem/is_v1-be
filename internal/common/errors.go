@@ -30,4 +30,8 @@ var (
 	ErrInvalidID = errors.New("invalid ID")
 
 	ErrProtectedRecord = errors.New("record related to other records, cannot be deleted")
+
+	ErrNeedAdmin = errors.New("need 1 active administrator")
+
+	ErrDepartmentAlreadyExists = errors.New("department already exists")
 )
