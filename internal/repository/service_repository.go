@@ -21,4 +21,6 @@ type ServiceRepository interface {
 	CreateService(ctx context.Context, service *model.Service) error
 
 	FindAllServicesWithServiceTypeAndThumbnailPaginated(ctx context.Context, query types.ServicePaginationQuery) ([]*model.Service, int64, error)
+
+	FindServiceByIDWithDetails(ctx context.Context, serviceID int64) (*model.Service, error)
 }

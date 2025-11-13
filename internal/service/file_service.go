@@ -8,4 +8,6 @@ import (
 
 type FileService interface {
 	CreateUploadURL(ctx context.Context, req types.PresignedURLRequest) (string, error)
+
+	CreateViewURL(ctx context.Context, objectKey string) (string, error)
 }

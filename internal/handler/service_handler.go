@@ -204,3 +204,30 @@ func (h *ServiceHandler) GetServicesForAdmin(c *gin.Context) {
 
 	common.ToAPIResponse(c, http.StatusOK, "Get service list successfully", common.ToServiceListResponse(services, meta))
 }
+
+func (h *ServiceHandler) GetServiceByID(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	serviceIDStr := c.Param("id")
+	serviceID, err := strconv.ParseInt(serviceIDStr, 10, 64)
+	if err != nil {
+		common.ToAPIResponse(c, http.StatusBadRequest, common.ErrInvalidID.Error(), nil)
+		return
+	}
+
+	service, err := h.serviceSvc.GetServiceByID(ctx, serviceID)
+	if err != nil {
+		switch err {
+		case common.ErrServiceNotFound:
+			common.ToAPIResponse(c, http.StatusNotFound, err.Error(), nil)
+		default:
+			common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
+		}
+		return
+	}
+
+	common.ToAPIResponse(c, http.StatusOK, "Get service information successfully", gin.H{
+		"service": common.ToServiceResponse(service),
+	})
+}

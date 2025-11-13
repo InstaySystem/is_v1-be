@@ -14,7 +14,7 @@ import (
 	"github.com/InstaySystem/is-be/internal/initialization"
 	"github.com/InstaySystem/is-be/internal/router"
 	"github.com/InstaySystem/is-be/internal/worker"
-	"github.com/emersion/go-imap/client"
+	// "github.com/emersion/go-imap/client"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -27,7 +27,7 @@ type Server struct {
 	db     *initialization.DB
 	rdb    *redis.Client
 	mq     *initialization.MQ
-	imap   *client.Client
+	// imap   *client.Client
 	logger *zap.Logger
 }
 
@@ -52,10 +52,10 @@ func NewServer(cfg *config.Config) (*Server, error) {
 		return nil, err
 	}
 
-	imap, err := initialization.InitIMAP(cfg)
-	if err != nil {
-		return nil, err
-	}
+	// imap, err := initialization.InitIMAP(cfg)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	sf, err := initialization.InitSnowFlake()
 	if err != nil {
@@ -69,7 +69,7 @@ func NewServer(cfg *config.Config) (*Server, error) {
 
 	ctn := container.NewContainer(cfg, db.Gorm, rdb, s3, sf, logger, mq.Conn, mq.Chan)
 
-	emailWorker := worker.NewEmailWorker(ctn.MQProvider, ctn.SMTPProvider, imap, logger)
+	emailWorker := worker.NewEmailWorker(ctn.MQProvider, ctn.SMTPProvider, logger)
 	go emailWorker.StartSendAuthEmail()
 
 	r := gin.Default()
@@ -111,7 +111,7 @@ func NewServer(cfg *config.Config) (*Server, error) {
 		db,
 		rdb,
 		mq,
-		imap,
+		// imap,
 		logger,
 	}, nil
 }
@@ -133,9 +133,9 @@ func (s *Server) Shutdown(ctx context.Context) {
 		s.mq.Close()
 	}
 
-	if s.imap != nil {
-		s.imap.Logout()
-	}
+	// if s.imap != nil {
+	// 	s.imap.Logout()
+	// }
 
 	if s.logger != nil {
 		s.logger.Sync()

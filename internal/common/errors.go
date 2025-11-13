@@ -46,4 +46,8 @@ var (
 	ErrServiceAlreadyExists = errors.New("service already exists")
 
 	ErrServiceNotFound = errors.New("service not found")
+
+	ErrInvalidQuery = errors.New("invalid query")
+
+	ErrFileNotFound = errors.New("file not found")
 )

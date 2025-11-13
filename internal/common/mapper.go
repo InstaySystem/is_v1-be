@@ -170,14 +170,14 @@ func ToSimpleServiceTypeResponse(serviceType *model.ServiceType) *types.SimpleSe
 	}
 }
 
-func ToSimpleServiceImageResponse(serviceImage *model.ServiceImage) *types.SimpleServiceImageResponse {
-	if serviceImage == nil {
+func ToSimpleServiceImageResponse(image *model.ServiceImage) *types.SimpleServiceImageResponse {
+	if image == nil {
 		return nil
 	}
 
 	return &types.SimpleServiceImageResponse{
-		ID: serviceImage.ID,
-		Key: serviceImage.Key,
+		ID:  image.ID,
+		Key: image.Key,
 	}
 }
 
@@ -187,12 +187,12 @@ func ToSimpleServiceResponse(service *model.Service) *types.SimpleServiceRespons
 	}
 
 	return &types.SimpleServiceResponse{
-		ID: service.ID,
-		Name: service.Name,
-		Price: service.Price,
-		IsActive: service.IsActive,
+		ID:          service.ID,
+		Name:        service.Name,
+		Price:       service.Price,
+		IsActive:    service.IsActive,
 		ServiceType: ToSimpleServiceTypeResponse(service.ServiceType),
-		Thumbnail: ToSimpleServiceImageResponse(service.ServiceImages[0]),
+		Thumbnail:   ToSimpleServiceImageResponse(service.ServiceImages[0]),
 	}
 }
 
@@ -212,6 +212,52 @@ func ToSimpleServicesResponse(services []*model.Service) []*types.SimpleServiceR
 func ToServiceListResponse(services []*model.Service, meta *types.MetaResponse) *types.ServiceListResponse {
 	return &types.ServiceListResponse{
 		Services: ToSimpleServicesResponse(services),
-		Meta:  meta,
+		Meta:     meta,
+	}
+}
+
+func ToServiceImageResponse(image *model.ServiceImage) *types.ServiceImageResponse {
+	if image == nil {
+		return nil
+	}
+
+	return &types.ServiceImageResponse{
+		ID:          image.ID,
+		Key:         image.Key,
+		IsThumbnail: image.IsThumbnail,
+		SortOrder:   image.SortOrder,
+		UploadedAt:  image.UploadedAt,
+	}
+}
+
+func ToServiceImagesResponse(images []*model.ServiceImage) []*types.ServiceImageResponse {
+	if len(images) == 0 {
+		return make([]*types.ServiceImageResponse, 0)
+	}
+
+	imageRes := make([]*types.ServiceImageResponse, 0, len(images))
+	for _, img := range images {
+		imageRes = append(imageRes, ToServiceImageResponse(img))
+	}
+
+	return imageRes
+}
+
+func ToServiceResponse(service *model.Service) *types.ServiceResponse {
+	if service == nil {
+		return nil
+	}
+
+	return &types.ServiceResponse{
+		ID:            service.ID,
+		Name:          service.Name,
+		Price:         service.Price,
+		IsActive:      service.IsActive,
+		CreatedAt:     service.CreatedAt,
+		UpdatedAt:     service.UpdatedAt,
+		ServiceType:   ToSimpleServiceTypeResponse(service.ServiceType),
+		CreatedBy:     ToBasicUserResponse(service.CreatedBy),
+		UpdatedBy:     ToBasicUserResponse(service.UpdatedBy),
+		ServiceImages: ToServiceImagesResponse(service.ServiceImages),
 	}
 }

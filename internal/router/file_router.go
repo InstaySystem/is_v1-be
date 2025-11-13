@@ -9,5 +9,7 @@ func FileRouter(rg *gin.RouterGroup, hdl *handler.FileHandler) {
 	file := rg.Group("/files")
 	{
 		file.POST("/presigned-url", hdl.CreatePresignedURL)
+
+		file.GET("/view", hdl.ViewFile)
 	}
 }

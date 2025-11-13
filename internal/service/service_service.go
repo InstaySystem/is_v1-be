@@ -19,4 +19,6 @@ type ServiceService interface {
 	CreateService(ctx context.Context, userID int64, req types.CreateServiceRequest) (int64, error)
 
 	GetServicesForAdmin(ctx context.Context, query types.ServicePaginationQuery) ([]*model.Service, *types.MetaResponse, error)
+
+	GetServiceByID(ctx context.Context, serviceID int64) (*model.Service, error)
 }

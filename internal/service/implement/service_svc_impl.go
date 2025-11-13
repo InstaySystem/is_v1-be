@@ -206,3 +206,16 @@ func (s *serviceSvcImpl) GetServicesForAdmin(ctx context.Context, query types.Se
 
 	return services, meta, nil
 }
+
+func (s *serviceSvcImpl) GetServiceByID(ctx context.Context, serviceID int64) (*model.Service, error) {
+	service, err := s.serviceRepo.FindServiceByIDWithDetails(ctx, serviceID)
+	if err != nil {
+		s.logger.Error("find service by id failed", zap.Int64("id", serviceID), zap.Error(err))
+		return nil, err
+	}
+	if service == nil {
+		return nil, common.ErrServiceNotFound
+	}
+
+	return service, nil
+}

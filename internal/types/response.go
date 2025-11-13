@@ -93,6 +93,14 @@ type SimpleServiceImageResponse struct {
 	Key string `json:"key"`
 }
 
+type ServiceImageResponse struct {
+	ID          int64     `json:"id"`
+	Key         string    `json:"key"`
+	IsThumbnail bool      `json:"is_thumbnail"`
+	SortOrder   uint32    `json:"sort_order"`
+	UploadedAt  time.Time `json:"uploaded_at"`
+}
+
 type SimpleServiceResponse struct {
 	ID          int64                       `json:"id"`
 	Name        string                      `json:"name"`
@@ -100,4 +108,17 @@ type SimpleServiceResponse struct {
 	IsActive    bool                        `json:"is_active"`
 	ServiceType *SimpleServiceTypeResponse  `json:"service_type"`
 	Thumbnail   *SimpleServiceImageResponse `json:"thumbnail"`
+}
+
+type ServiceResponse struct {
+	ID            int64                      `json:"id"`
+	Name          string                     `json:"name"`
+	Price         float64                    `json:"price"`
+	IsActive      bool                       `json:"is_active"`
+	CreatedAt     time.Time                  `json:"created_at"`
+	UpdatedAt     time.Time                  `json:"updated_at"`
+	ServiceType   *SimpleServiceTypeResponse `json:"service_type"`
+	CreatedBy     *BasicUserResponse         `json:"created_by"`
+	UpdatedBy     *BasicUserResponse         `json:"updated_by"`
+	ServiceImages []*ServiceImageResponse    `json:"images"`
 }

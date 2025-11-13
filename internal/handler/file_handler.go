@@ -30,13 +30,39 @@ func (h *FileHandler) CreatePresignedURL(c *gin.Context) {
 		return
 	}
 
-  presignedURL, err := h.fileSvc.CreateUploadURL(ctx, req)
+	presignedURL, err := h.fileSvc.CreateUploadURL(ctx, req)
 	if err != nil {
 		common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
 		return
 	}
 
-	common.ToAPIResponse(c, http.StatusOK, "Generate presigned url successfully", gin.H{
+	common.ToAPIResponse(c, http.StatusOK, "Generate upload presigned url successfully", gin.H{
+		"presigned_url": presignedURL,
+	})
+}
+
+func (h *FileHandler) ViewFile(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	objectKey := c.Query("key")
+	if objectKey == "" {
+		common.ToAPIResponse(c, http.StatusBadRequest, common.ErrInvalidQuery.Error(), nil)
+		return
+	}
+
+	presignedURL, err := h.fileSvc.CreateViewURL(ctx, objectKey)
+	if err != nil {
+		switch err {
+		case common.ErrFileNotFound:
+			common.ToAPIResponse(c, http.StatusNotFound, err.Error(), nil)
+		default:
+			common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
+		}
+		return
+	}
+
+	common.ToAPIResponse(c, http.StatusOK, "Generate view presigned url successfully", gin.H{
 		"presigned_url": presignedURL,
 	})
 }

@@ -2,6 +2,7 @@ package implement
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/InstaySystem/is-be/internal/types"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	s3Types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
@@ -42,9 +44,36 @@ func (s *fileSvcImpl) CreateUploadURL(ctx context.Context, req types.PresignedUR
 		opts.Expires = 15 * time.Minute
 	})
 	if err != nil {
-		s.logger.Error("generate presigned URL failed", zap.Error(err))
+		s.logger.Error("generate upload presigned URL failed", zap.Error(err))
 		return "", err
 	}
 
 	return presignedRes.URL, nil
+}
+
+func (s *fileSvcImpl) CreateViewURL(ctx context.Context, objectKey string) (string, error) {
+	if _, err := s.client.HeadObject(ctx, &s3.HeadObjectInput{
+		Bucket: aws.String(s.cfg.S3.Bucket),
+		Key:    aws.String(objectKey),
+	}); err != nil {
+		var keyNotFound *s3Types.NotFound
+		if errors.As(err, &keyNotFound) {
+			return "", common.ErrFileNotFound
+		}
+		s.logger.Error("file check failed", zap.Error(err))
+		return "", err
+	}
+
+	presignedReq, err := s.presigner.PresignGetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(s.cfg.S3.Bucket),
+		Key:    aws.String(objectKey),
+	}, func(opts *s3.PresignOptions) {
+		opts.Expires = 15 * time.Minute
+	})
+	if err != nil {
+		s.logger.Error("generate view presigned URL failed", zap.Error(err))
+		return "", err
+	}
+
+	return presignedReq.URL, nil
 }
