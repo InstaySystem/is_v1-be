@@ -263,8 +263,18 @@ func (h *ServiceHandler) UpdateService(c *gin.Context) {
 	}
 
 	if err := h.serviceSvc.UpdateService(ctx, serviceID, user.ID, req); err != nil {
-
+		switch err {
+		case common.ErrServiceNotFound, common.ErrServiceTypeNotFound, common.ErrHasServiceImageNotFound:
+			common.ToAPIResponse(c, http.StatusNotFound, err.Error(), nil)
+		case common.ErrServiceAlreadyExists:
+			common.ToAPIResponse(c, http.StatusNotFound, err.Error(), nil)
+		default:
+			common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
+		}
+		return
 	}
+
+	common.ToAPIResponse(c, http.StatusOK, "Service updated successfully", nil)
 }
 
 func (h *ServiceHandler) GetServiceTypesForGuest(c *gin.Context) {
@@ -280,4 +290,28 @@ func (h *ServiceHandler) GetServiceTypesForGuest(c *gin.Context) {
 	common.ToAPIResponse(c, http.StatusOK, "Get service types successfully", gin.H{
 		"service_types": common.ToSimpleServiceTypesResponse(serviceTypes),
 	})
+}
+
+func (h *ServiceHandler) DeleteService(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	serviceIDStr := c.Param("id")
+	serviceID, err := strconv.ParseInt(serviceIDStr, 10, 64)
+	if err != nil {
+		common.ToAPIResponse(c, http.StatusBadRequest, common.ErrInvalidID.Error(), nil)
+		return
+	}
+
+	if err := h.serviceSvc.DeleteService(ctx, serviceID); err != nil {
+		switch err {
+		case common.ErrServiceNotFound:
+			common.ToAPIResponse(c, http.StatusNotFound, err.Error(), nil)
+		default:
+			common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
+		}
+		return
+	}
+
+	common.ToAPIResponse(c, http.StatusOK, "Service deleted successfully", nil)
 }

@@ -36,4 +36,8 @@ type ServiceRepository interface {
 	UpdateServiceTx(ctx context.Context, tx *gorm.DB, serviceID int64, updateData map[string]any) error
 
 	FindAllServiceType(ctx context.Context) ([]*model.ServiceType, error)
+
+	FindServiceByIDWithServiceImages(ctx context.Context, serviceID int64) (*model.Service, error)
+
+	DeleteService(ctx context.Context, serviceID int64) error
 }

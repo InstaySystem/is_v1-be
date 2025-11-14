@@ -379,3 +379,43 @@ func (s *serviceSvcImpl) UpdateService(ctx context.Context, serviceID, userID in
 
 	return nil
 }
+
+func (s *serviceSvcImpl) DeleteService(ctx context.Context, serviceID int64) error {
+	service, err := s.serviceRepo.FindServiceByIDWithServiceImages(ctx, serviceID)
+	if err != nil {
+		s.logger.Error("find service by id failed", zap.Int64("id", serviceID), zap.Error(err))
+		return err
+	}
+	if service == nil {
+		return common.ErrServiceNotFound
+	}
+
+	if err := s.serviceRepo.DeleteService(ctx, serviceID); err != nil {
+		if errors.Is(err, common.ErrServiceNotFound) {
+			return err
+		}
+		s.logger.Error("delete service failed", zap.Int64("id", serviceID), zap.Error(err))
+		return err
+	}
+
+	if len(service.ServiceImages) > 0 {
+		ch := make(chan string, len(service.ServiceImages))
+		for _, img := range service.ServiceImages {
+			if strings.TrimSpace(img.Key) != "" {
+				ch <- img.Key
+			}
+		}
+		close(ch)
+
+		go func() {
+			for key := range ch {
+				body := []byte(key)
+				if err := s.mqProvider.PublishMessage(common.ExchangeFile, common.RoutingKeyDeleteFile, body); err != nil {
+					s.logger.Error("publish delete file message failed", zap.Error(err))
+				}
+			}
+		}()
+	}
+
+	return nil
+}

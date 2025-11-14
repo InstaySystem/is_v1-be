@@ -55,6 +55,18 @@ func (r *serviceRepoImpl) FindServiceTypeByID(ctx context.Context, serviceTypeID
 	return &serviceType, nil
 }
 
+func (r *serviceRepoImpl) FindServiceByIDWithServiceImages(ctx context.Context, serviceID int64) (*model.Service, error) {
+	var service model.Service
+	if err := r.db.WithContext(ctx).Preload("ServiceImages").Where("id = ?", serviceID).First(&service).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &service, nil
+}
+
 func (r *serviceRepoImpl) UpdateServiceType(ctx context.Context, serviceTypeID int64, updateData map[string]any) error {
 	result := r.db.WithContext(ctx).Model(&model.ServiceType{}).Where("id = ?", serviceTypeID).Updates(updateData)
 	if result.Error != nil {
@@ -95,6 +107,19 @@ func (r *serviceRepoImpl) DeleteServiceType(ctx context.Context, serviceTypeID i
 
 func (r *serviceRepoImpl) CreateService(ctx context.Context, service *model.Service) error {
 	return r.db.WithContext(ctx).Create(service).Error
+}
+
+func (r *serviceRepoImpl) DeleteService(ctx context.Context, serviceID int64) error {
+	result := r.db.WithContext(ctx).Where("id = ?", serviceID).Delete(&model.Service{})
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return common.ErrServiceNotFound
+	}
+
+	return nil
 }
 
 func (r *serviceRepoImpl) FindAllServiceImagesByIDTx(ctx context.Context, tx *gorm.DB, ids []int64) ([]*model.ServiceImage, error) {
