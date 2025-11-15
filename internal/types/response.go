@@ -7,6 +7,15 @@ type APIResponse struct {
 	Data    any    `json:"data,omitempty"`
 }
 
+type UploadPresignedURLResponse struct {
+	Url string `json:"url"`
+	Key string `json:"key"`
+}
+
+type ViewPresignedURLResponse struct {
+	Url string `json:"url"`
+}
+
 type UserResponse struct {
 	ID         int64                     `json:"id"`
 	Username   string                    `json:"username"`

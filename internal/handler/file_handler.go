@@ -19,50 +19,46 @@ func NewFileHandler(fileSvc service.FileService) *FileHandler {
 	return &FileHandler{fileSvc}
 }
 
-func (h *FileHandler) CreatePresignedURL(c *gin.Context) {
+func (h *FileHandler) UploadPresignedURLs(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	var req types.PresignedURLRequest
+	var req types.UploadPresignedURLsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		mess := common.HandleValidationError(err)
 		common.ToAPIResponse(c, http.StatusBadRequest, mess, nil)
 		return
 	}
 
-	presignedURL, err := h.fileSvc.CreateUploadURL(ctx, req)
+	presignedURLs, err := h.fileSvc.CreateUploadURLs(ctx, req)
 	if err != nil {
 		common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
 		return
 	}
 
-	common.ToAPIResponse(c, http.StatusOK, "Generate upload presigned url successfully", gin.H{
-		"presigned_url": presignedURL,
+	common.ToAPIResponse(c, http.StatusOK, "Generate upload presigned urls successfully", gin.H{
+		"presigned_urls": presignedURLs,
 	})
 }
 
-func (h *FileHandler) ViewFile(c *gin.Context) {
+func (h *FileHandler) ViewPresignedURLs(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	objectKey := c.Query("key")
-	if objectKey == "" {
-		common.ToAPIResponse(c, http.StatusBadRequest, common.ErrInvalidQuery.Error(), nil)
+	var req types.ViewPresignedURLsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		mess := common.HandleValidationError(err)
+		common.ToAPIResponse(c, http.StatusBadRequest, mess, nil)
 		return
 	}
 
-	presignedURL, err := h.fileSvc.CreateViewURL(ctx, objectKey)
+	presignedURLs, err := h.fileSvc.CreateViewURLs(ctx, req)
 	if err != nil {
-		switch err {
-		case common.ErrFileNotFound:
-			common.ToAPIResponse(c, http.StatusNotFound, err.Error(), nil)
-		default:
-			common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
-		}
+		common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
 		return
 	}
 
 	common.ToAPIResponse(c, http.StatusOK, "Generate view presigned url successfully", gin.H{
-		"presigned_url": presignedURL,
+		"presigned_url": presignedURLs,
 	})
 }

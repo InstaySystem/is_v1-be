@@ -7,7 +7,7 @@ import (
 )
 
 type FileService interface {
-	CreateUploadURL(ctx context.Context, req types.PresignedURLRequest) (string, error)
+	CreateUploadURLs(ctx context.Context, req types.UploadPresignedURLsRequest) ([]*types.UploadPresignedURLResponse, error)
 
-	CreateViewURL(ctx context.Context, objectKey string) (string, error)
+	CreateViewURLs(ctx context.Context, req types.ViewPresignedURLsRequest) ([]*types.ViewPresignedURLResponse, error)
 }

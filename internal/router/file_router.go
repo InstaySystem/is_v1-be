@@ -8,8 +8,8 @@ import (
 func FileRouter(rg *gin.RouterGroup, hdl *handler.FileHandler) {
 	file := rg.Group("/files")
 	{
-		file.POST("/presigned-url", hdl.CreatePresignedURL)
+		file.POST("/presigned-urls/uploads", hdl.UploadPresignedURLs)
 
-		file.GET("/view", hdl.ViewFile)
+		file.POST("/presigned-urls/views", hdl.ViewPresignedURLs)
 	}
 }
