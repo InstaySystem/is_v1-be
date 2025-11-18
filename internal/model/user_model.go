@@ -27,4 +27,8 @@ type User struct {
 	RoomTypesUpdated    []*RoomType    `gorm:"foreignKey:UpdatedByID;references:ID;constraint:fk_room_types_updated_by,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"room_types_updated"`
 	ServicesCreated     []*Service     `gorm:"foreignKey:CreatedByID;references:ID;constraint:fk_services_created_by,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"services_created"`
 	ServicesUpdated     []*Service     `gorm:"foreignKey:UpdatedByID;references:ID;constraint:fk_services_updated_by,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"services_updated"`
+	RoomsCreated        []*Room        `gorm:"foreignKey:CreatedByID;references:ID;constraint:fk_rooms_created_by,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"rooms_created"`
+	RoomsUpdated        []*Room        `gorm:"foreignKey:UpdatedByID;references:ID;constraint:fk_rooms_updated_by,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"rooms_updated"`
+	BookedRoomsCreated  []*BookedRoom  `gorm:"foreignKey:CreatedByID;references:ID;constraint:fk_booked_rooms_created_by,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"booked_rooms_created"`
+	BookedRoomsUpdated  []*BookedRoom  `gorm:"foreignKey:UpdatedByID;references:ID;constraint:fk_booked_rooms_updated_by,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"booked_rooms_updated"`
 }

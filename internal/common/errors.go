@@ -58,4 +58,10 @@ var (
 	ErrRequestTypeAlreadyExists = errors.New("request type already exists")
 
 	ErrRoomTypeAlreadyExists = errors.New("room type already exists")
+
+	ErrRoomAlreadyExists = errors.New("room already exists")
+
+	ErrRoomTypeNotFound = errors.New("room type not found")
+
+	ErrRoomNotFound = errors.New("room not found")
 )

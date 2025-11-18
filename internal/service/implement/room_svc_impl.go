@@ -2,6 +2,7 @@ package implement
 
 import (
 	"context"
+	"errors"
 
 	"github.com/InstaySystem/is-be/internal/common"
 	"github.com/InstaySystem/is-be/internal/model"
@@ -63,5 +64,114 @@ func (s *roomSvcImpl) GetRoomTypesForAdmin(ctx context.Context) ([]*model.RoomTy
 		return nil, err
 	}
 
+	if len(roomTypes) == 0 {
+		return roomTypes, nil
+	}
+
+	roomTypeIDs := make([]int64, len(roomTypes))
+	for i, roomType := range roomTypes {
+		roomTypeIDs[i] = roomType.ID
+	}
+
+	roomCounts, err := s.roomRepo.CountRoomByRoomTypeID(ctx, roomTypeIDs)
+	if err != nil {
+		s.logger.Error("count room by room type ID failed", zap.Error(err))
+		return nil, err
+	}
+
+	for _, roomType := range roomTypes {
+		roomType.RoomCount = roomCounts[roomType.ID]
+	}
+
 	return roomTypes, nil
+}
+
+func (s *roomSvcImpl) UpdateRoomType(ctx context.Context, roomTypeID, userID int64, req types.UpdateRoomTypeRequest) error {
+	updateData := map[string]any{
+		"name":          req.Name,
+		"slug":          common.GenerateSlug(req.Name),
+		"updated_by_id": userID,
+	}
+
+	if err := s.roomRepo.UpdateRoomType(ctx, roomTypeID, updateData); err != nil {
+		if errors.Is(err, common.ErrRoomTypeNotFound) {
+			return err
+		}
+		if ok, _ := common.IsUniqueViolation(err); ok {
+			return common.ErrRoomTypeAlreadyExists
+		}
+		s.logger.Error("update room type failed", zap.Int64("id", roomTypeID), zap.Error(err))
+		return err
+	}
+
+	return nil
+}
+
+func (s *roomSvcImpl) DeleteRoomType(ctx context.Context, roomTypeID int64) error {
+	if err := s.roomRepo.DeleteRoomType(ctx, roomTypeID); err != nil {
+		if errors.Is(err, common.ErrRoomTypeNotFound) {
+			return err
+		}
+		if common.IsForeignKeyViolation(err) {
+			return common.ErrProtectedRecord
+		}
+		s.logger.Error("delete room type failed", zap.Int64("id", roomTypeID), zap.Error(err))
+		return err
+	}
+
+	return nil
+}
+
+func (s *roomSvcImpl) CreateRoom(ctx context.Context, userID int64, req types.CreateRoomRequest) error {
+	roomID, err := s.sfGen.NextID()
+	if err != nil {
+		s.logger.Error("generate room ID failed", zap.Error(err))
+		return err
+	}
+
+	floor, err := s.roomRepo.FindFloorByName(ctx, req.Floor)
+	if err != nil {
+		s.logger.Error("find floor bay name failed", zap.String("name", req.Floor), zap.Error(err))
+		return err
+	}
+	if floor == nil {
+		floorID, err := s.sfGen.NextID()
+		if err != nil {
+			s.logger.Error("generate floor ID failed", zap.Error(err))
+			return err
+		}
+
+		floor = &model.Floor{
+			ID:   floorID,
+			Name: req.Floor,
+		}
+
+		if err = s.roomRepo.CreateFloor(ctx, floor); err != nil {
+			s.logger.Error("create floor failed", zap.Error(err))
+			return err
+		}
+	}
+
+	room := &model.Room{
+		ID:          roomID,
+		RoomTypeID:  req.RoomTypeID,
+		FloorID:     floor.ID,
+		Name:        req.Name,
+		Slug:        common.GenerateSlug(req.Name),
+		CreatedByID: userID,
+		UpdatedByID: userID,
+	}
+
+	if err = s.roomRepo.CreateRoom(ctx, room); err != nil {
+		if ok, _ := common.IsUniqueViolation(err); ok {
+			return common.ErrRoomAlreadyExists
+		}
+		if common.IsForeignKeyViolation(err) {
+			return common.ErrRoomTypeNotFound
+		}
+		s.logger.Error("create room failed", zap.Error(err))
+		return err
+	}
+
+	return nil
 }

@@ -20,6 +20,21 @@ func NewServiceHandler(serviceSvc service.ServiceService) *ServiceHandler {
 	return &ServiceHandler{serviceSvc}
 }
 
+// CreateServiceType godoc
+// @Summary      Create Service Type
+// @Description  Tạo một loại dịch vụ mới
+// @Tags         Services
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        payload  				body      types.CreateServiceTypeRequest  true  "Thông tin loại dịch vụ mới"
+// @Success      201      				{object}  types.APIResponse  "Tạo service type thành công"
+// @Failure      400      				{object}  types.APIResponse  "Bad Request (validation error)"
+// @Failure      401      				{object}  types.APIResponse  "Unauthorized"
+// @Failure      404      				{object}  types.APIResponse  "Department không tìm thấy"
+// @Failure      409      				{object}  types.APIResponse  "Conflict (service type name đã tồn tại)"
+// @Failure      500      				{object}  types.APIResponse  "Internal Server Error"
+// @Router       /admin/service-types   [post]
 func (h *ServiceHandler) CreateServiceType(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -58,6 +73,17 @@ func (h *ServiceHandler) CreateServiceType(c *gin.Context) {
 	common.ToAPIResponse(c, http.StatusCreated, "Service type created successfully", nil)
 }
 
+// GetServiceTypesForAdmin godoc
+// @Summary      Get Service Types for Admin
+// @Description  Lấy tất cả loại dịch vụ cho admin xem
+// @Tags         Services
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Success      200    				{object}  types.APIResponse{data=[]types.ServiceTypeResponse}  "Lấy tất cả service type thành công"
+// @Failure      401    				{object}  types.APIResponse  "Unauthorized"
+// @Failure      409    				{object}  types.APIResponse  "Invalid Information"
+// @Failure      500    				{object}  types.APIResponse  "Internal Server Error"
+// @Router       /admin/service-types [get]
 func (h *ServiceHandler) GetServiceTypesForAdmin(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -73,6 +99,22 @@ func (h *ServiceHandler) GetServiceTypesForAdmin(c *gin.Context) {
 	})
 }
 
+// UpdateServiceType godoc
+// @Summary      Update Service Type
+// @Description  Cập nhật thông tin của một loại dịch vụ bằng ID
+// @Tags         Services
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id          				 path      int                      true  "Service Type ID"
+// @Param        payload     				 body      types.UpdateServiceTypeRequest  true  "Thông tin cần cập nhật"
+// @Success      200                 {object}  types.APIResponse  "Cập nhật service type thành công"
+// @Failure      400         				 {object}  types.APIResponse  "Bad Request (validation, ID, logic error)"
+// @Failure      401         				 {object}  types.APIResponse  "Unauthorized"
+// @Failure      404         				 {object}  types.APIResponse  "Department Not Found"
+// @Failure      409         				 {object}  types.APIResponse  "Conflict (service type name đã tồn tại)"
+// @Failure      500                 {object}  types.APIResponse  "Internal Server Error"
+// @Router       /admin/service-types/{id} [patch]
 func (h *ServiceHandler) UpdateServiceType(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -118,6 +160,20 @@ func (h *ServiceHandler) UpdateServiceType(c *gin.Context) {
 	common.ToAPIResponse(c, http.StatusOK, "Service type updated successfully", nil)
 }
 
+// DeleteServiceType godoc
+// @Summary      Delete Service Type
+// @Description  Xoá một loại dịch vụ bằng ID
+// @Tags         Services
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id   							 path      int  true  "Service Type ID"
+// @Success      200  							 {object}  types.APIResponse  "Xoá service type thành công"
+// @Failure      400  							 {object}  types.APIResponse  "Bad Request (ID không hợp lệ)"
+// @Failure      401  							 {object}  types.APIResponse  "Unauthorized"
+// @Failure      404  							 {object}  types.APIResponse  "Service type không tìm thấy"
+// @Failure      409  							 {object}  types.APIResponse  "Conflict (không thể xoá bản ghi được bảo vệ)"
+// @Failure      500  							 {object}  types.APIResponse  "Internal Server Error"
+// @Router       /admin/service-types/{id} [delete]
 func (h *ServiceHandler) DeleteServiceType(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -129,7 +185,7 @@ func (h *ServiceHandler) DeleteServiceType(c *gin.Context) {
 		return
 	}
 
-	if err := h.serviceSvc.DeleteServiceType(ctx, serviceTypeID); err != nil {
+	if err = h.serviceSvc.DeleteServiceType(ctx, serviceTypeID); err != nil {
 		switch err {
 		case common.ErrServiceTypeNotFound:
 			common.ToAPIResponse(c, http.StatusNotFound, err.Error(), nil)
@@ -144,6 +200,21 @@ func (h *ServiceHandler) DeleteServiceType(c *gin.Context) {
 	common.ToAPIResponse(c, http.StatusOK, "Service type deleted successfully", nil)
 }
 
+// CreateService godoc
+// @Summary      Create Service 
+// @Description  Tạo một dịch vụ mới
+// @Tags         Services
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        payload  	 body      types.CreateServiceRequest  true  "Thông tin dịch vụ mới"
+// @Success      201      	 {object}  types.APIResponse  "Tạo service thành công"
+// @Failure      400      	 {object}  types.APIResponse  "Bad Request (validation error)"
+// @Failure      401      	 {object}  types.APIResponse  "Unauthorized"
+// @Failure      404      	 {object}  types.APIResponse  "Service type không tìm thấy"
+// @Failure      409      	 {object}  types.APIResponse  "Conflict (service name đã tồn tại)"
+// @Failure      500      	 {object}  types.APIResponse  "Internal Server Error"
+// @Router       /admin/services   [post]
 func (h *ServiceHandler) CreateService(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -185,6 +256,19 @@ func (h *ServiceHandler) CreateService(c *gin.Context) {
 	})
 }
 
+// GetServicesForAdmin godoc
+// @Summary      Get Services for Admin
+// @Description  Lấy danh sách dịch vụ có phân trang và lọc
+// @Tags         Services
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        query  query     types.ServicePaginationQuery  false  "Query phân trang và lọc"
+// @Success      200    {object}  types.APIResponse{data=types.ServiceListResponse}  "Lấy danh sách service thành công"
+// @Failure      400    {object}  types.APIResponse  "Bad Request (query không hợp lệ)"
+// @Failure      401    {object}  types.APIResponse  "Unauthorized"
+// @Failure      409    {object}  types.APIResponse  "Invalid Information"
+// @Failure      500    {object}  types.APIResponse  "Internal Server Error"
+// @Router       /admin/services [get]
 func (h *ServiceHandler) GetServicesForAdmin(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -205,6 +289,20 @@ func (h *ServiceHandler) GetServicesForAdmin(c *gin.Context) {
 	common.ToAPIResponse(c, http.StatusOK, "Get service list successfully", common.ToServiceListResponse(services, meta))
 }
 
+// GetServiceByID godoc
+// @Summary      Get Service By ID
+// @Description  Lấy thông tin chi tiết của một dịch vụ bằng ID
+// @Tags         Services
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id          path      int  true  "Service ID"
+// @Success      200         {object}  types.APIResponse{data=object{service=types.ServiceResponse}}  "Lấy thông tin service thành công"
+// @Failure      400         {object}  types.APIResponse  "Bad Request (ID không hợp lệ)"
+// @Failure      401         {object}  types.APIResponse  "Unauthorized"
+// @Failure      404         {object}  types.APIResponse  "Service Not Found"
+// @Failure      409         {object}  types.APIResponse  "Invalid Information"
+// @Failure      500         {object}  types.APIResponse  "Internal Server Error"
+// @Router       /admin/services/{id} [get]
 func (h *ServiceHandler) GetServiceByID(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -232,6 +330,22 @@ func (h *ServiceHandler) GetServiceByID(c *gin.Context) {
 	})
 }
 
+// UpdateService godoc
+// @Summary      Update Service 
+// @Description  Cập nhật thông tin của một dịch vụ bằng ID
+// @Tags         Services
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id          				 path      int                      true  "Service ID"
+// @Param        payload     				 body      types.UpdateServiceRequest  true  "Thông tin cần cập nhật"
+// @Success      200            {object}  types.APIResponse  "Cập nhật service thành công"
+// @Failure      400         		{object}  types.APIResponse  "Bad Request (validation, ID, logic error)"
+// @Failure      401         		{object}  types.APIResponse  "Unauthorized"
+// @Failure      404         		{object}  types.APIResponse  "Service Type Not Found"
+// @Failure      409         		{object}  types.APIResponse  "Conflict (service name đã tồn tại)"
+// @Failure      500            {object}  types.APIResponse  "Internal Server Error"
+// @Router       /admin/services/{id} [patch]
 func (h *ServiceHandler) UpdateService(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -277,6 +391,15 @@ func (h *ServiceHandler) UpdateService(c *gin.Context) {
 	common.ToAPIResponse(c, http.StatusOK, "Service updated successfully", nil)
 }
 
+// GetServiceTypesForGuest godoc
+// @Summary      Get Service Types for Guest
+// @Description  Lấy tất cả loại dịch vụ cho khách xem
+// @Tags         Services
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Success      200    				{object}  types.APIResponse{data=[]types.SimpleServiceTypeResponse}  "Lấy tất cả service type thành công"
+// @Failure      500    				{object}  types.APIResponse  "Internal Server Error"
+// @Router       /service-types [get]
 func (h *ServiceHandler) GetServiceTypesForGuest(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -292,6 +415,20 @@ func (h *ServiceHandler) GetServiceTypesForGuest(c *gin.Context) {
 	})
 }
 
+// DeleteService godoc
+// @Summary      Delete Service 
+// @Description  Xoá một dịch vụ bằng ID
+// @Tags         Services
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id   							  path      int  true  "Service ID"
+// @Success      200  							  {object}  types.APIResponse  "Xoá service thành công"
+// @Failure      400  							  {object}  types.APIResponse  "Bad Request (ID không hợp lệ)"
+// @Failure      401  							  {object}  types.APIResponse  "Unauthorized"
+// @Failure      404  							  {object}  types.APIResponse  "Service không tìm thấy"
+// @Failure      409  							  {object}  types.APIResponse  "Invalid Information"
+// @Failure      500  							  {object}  types.APIResponse  "Internal Server Error"
+// @Router       /admin/services/{id} [delete]
 func (h *ServiceHandler) DeleteService(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()

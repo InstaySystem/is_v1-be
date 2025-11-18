@@ -59,7 +59,7 @@ func (h *FileHandler) UploadPresignedURLs(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        payload                     body      types.ViewPresignedURLsRequest  true  "Danh sách file key cần xem"
-// @Success      200                         {object}  types.APIResponse{data=object{presigned_url=[]types.ViewPresignedURLResponse}}  "Tạo URL xem thành công"
+// @Success      200                         {object}  types.APIResponse{data=object{presigned_urls=[]types.ViewPresignedURLResponse}}  "Tạo URL xem thành công"
 // @Failure      400                         {object}  types.APIResponse  "Bad Request (validation error)"
 // @Failure      500                         {object}  types.APIResponse  "Internal Server Error"
 // @Router       /files/presigned-urls/views [post]

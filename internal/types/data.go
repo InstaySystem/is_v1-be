@@ -47,3 +47,8 @@ type ServiceCountResult struct {
 	ServiceTypeID int64 `gorm:"column:service_type_id"`
 	ServiceCount  int64 `gorm:"column:service_count"`
 }
+
+type RoomCountResult struct {
+	RoomTypeID int64 `gorm:"column:room_type_id"`
+	RoomCount  int64 `gorm:"column:room_count"`
+}

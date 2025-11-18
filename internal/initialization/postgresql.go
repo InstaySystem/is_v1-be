@@ -18,6 +18,9 @@ var allModels = []any{
 	&model.ServiceImage{},
 	&model.RequestType{},
 	&model.RoomType{},
+	&model.Floor{},
+	&model.Room{},
+	&model.BookedRoom{},
 }
 
 type DB struct {

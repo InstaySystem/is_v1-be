@@ -330,6 +330,7 @@ func ToRoomTypeResponse(roomType *model.RoomType) *types.RoomTypeResponse {
 		UpdatedAt: roomType.UpdatedAt,
 		CreatedBy: ToBasicUserResponse(roomType.CreatedBy),
 		UpdatedBy: ToBasicUserResponse(roomType.UpdatedBy),
+		RoomCount: roomType.RoomCount,
 	}
 }
 

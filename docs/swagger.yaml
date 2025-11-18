@@ -6,6 +6,17 @@ definitions:
       message:
         type: string
     type: object
+  types.BasicUserResponse:
+    properties:
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      username:
+        type: string
+    type: object
   types.ChangePasswordRequest:
     properties:
       new_password:
@@ -17,6 +28,57 @@ definitions:
     required:
     - new_password
     - old_password
+    type: object
+  types.CreateServiceImageRequest:
+    properties:
+      is_thumbnail:
+        type: boolean
+      key:
+        minLength: 2
+        type: string
+      sort_order:
+        type: integer
+    required:
+    - is_thumbnail
+    - key
+    - sort_order
+    type: object
+  types.CreateServiceRequest:
+    properties:
+      description:
+        type: string
+      images:
+        items:
+          $ref: '#/definitions/types.CreateServiceImageRequest'
+        minItems: 1
+        type: array
+      is_active:
+        type: boolean
+      name:
+        minLength: 2
+        type: string
+      price:
+        type: number
+      service_type_id:
+        type: integer
+    required:
+    - description
+    - images
+    - is_active
+    - name
+    - price
+    - service_type_id
+    type: object
+  types.CreateServiceTypeRequest:
+    properties:
+      department_id:
+        type: integer
+      name:
+        minLength: 2
+        type: string
+    required:
+    - department_id
+    - name
     type: object
   types.CreateUserRequest:
     properties:
@@ -107,10 +169,105 @@ definitions:
     - new_password
     - reset_password_token
     type: object
+  types.ServiceImageResponse:
+    properties:
+      id:
+        type: integer
+      is_thumbnail:
+        type: boolean
+      key:
+        type: string
+      sort_order:
+        type: integer
+      uploaded_at:
+        type: string
+    type: object
+  types.ServiceListResponse:
+    properties:
+      meta:
+        $ref: '#/definitions/types.MetaResponse'
+      services:
+        items:
+          $ref: '#/definitions/types.SimpleServiceResponse'
+        type: array
+    type: object
+  types.ServiceResponse:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        $ref: '#/definitions/types.BasicUserResponse'
+      id:
+        type: integer
+      images:
+        items:
+          $ref: '#/definitions/types.ServiceImageResponse'
+        type: array
+      is_active:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+      service_type:
+        $ref: '#/definitions/types.SimpleServiceTypeResponse'
+      updated_at:
+        type: string
+      updated_by:
+        $ref: '#/definitions/types.BasicUserResponse'
+    type: object
+  types.ServiceTypeResponse:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        $ref: '#/definitions/types.BasicUserResponse'
+      department:
+        $ref: '#/definitions/types.SimpleDepartmentResponse'
+      id:
+        type: integer
+      name:
+        type: string
+      service_count:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        $ref: '#/definitions/types.BasicUserResponse'
+    type: object
   types.SimpleDepartmentResponse:
     properties:
       display_name:
         type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  types.SimpleServiceImageResponse:
+    properties:
+      id:
+        type: integer
+      key:
+        type: string
+    type: object
+  types.SimpleServiceResponse:
+    properties:
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+      service_type:
+        $ref: '#/definitions/types.SimpleServiceTypeResponse'
+      thumbnail:
+        $ref: '#/definitions/types.SimpleServiceImageResponse'
+    type: object
+  types.SimpleServiceTypeResponse:
+    properties:
       id:
         type: integer
       name:
@@ -142,6 +299,54 @@ definitions:
       last_name:
         type: string
       phone:
+        type: string
+    type: object
+  types.UpdateServiceImageRequest:
+    properties:
+      id:
+        type: integer
+      is_thumbnail:
+        type: boolean
+      key:
+        minLength: 2
+        type: string
+      sort_order:
+        type: integer
+    required:
+    - id
+    type: object
+  types.UpdateServiceRequest:
+    properties:
+      delete_images:
+        items:
+          type: integer
+        type: array
+      description:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        minLength: 2
+        type: string
+      new_images:
+        items:
+          $ref: '#/definitions/types.CreateServiceImageRequest'
+        type: array
+      price:
+        type: number
+      service_type_id:
+        type: integer
+      update_images:
+        items:
+          $ref: '#/definitions/types.UpdateServiceImageRequest'
+        type: array
+    type: object
+  types.UpdateServiceTypeRequest:
+    properties:
+      department_id:
+        type: integer
+      name:
+        minLength: 2
         type: string
     type: object
   types.UpdateUserPasswordRequest:
@@ -289,6 +494,755 @@ info:
   title: Instay API
   version: "1.0"
 paths:
+  /admin/roles:
+    get:
+      description: Lấy danh sách tất cả các vai trò (key và tên hiển thị)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lấy danh sách vai trò thành công
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.APIResponse'
+            - properties:
+                data:
+                  properties:
+                    roles:
+                      type: object
+                  type: object
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "409":
+          description: Invalid Information
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get All Roles
+      tags:
+      - Users
+  /admin/service-types:
+    get:
+      description: Lấy tất cả loại dịch vụ cho admin xem
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lấy tất cả service type thành công
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/types.ServiceTypeResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "409":
+          description: Invalid Information
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get Service Types for Admin
+      tags:
+      - Services
+    post:
+      consumes:
+      - application/json
+      description: Tạo một loại dịch vụ mới
+      parameters:
+      - description: Thông tin loại dịch vụ mới
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/types.CreateServiceTypeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Tạo service type thành công
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "400":
+          description: Bad Request (validation error)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "404":
+          description: Department không tìm thấy
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "409":
+          description: Conflict (service type name đã tồn tại)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create Service Type
+      tags:
+      - Services
+  /admin/service-types/{id}:
+    delete:
+      description: Xoá một loại dịch vụ bằng ID
+      parameters:
+      - description: Service Type ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Xoá service type thành công
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "400":
+          description: Bad Request (ID không hợp lệ)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "404":
+          description: Service type không tìm thấy
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "409":
+          description: Conflict (không thể xoá bản ghi được bảo vệ)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Service Type
+      tags:
+      - Services
+    patch:
+      consumes:
+      - application/json
+      description: Cập nhật thông tin của một loại dịch vụ bằng ID
+      parameters:
+      - description: Service Type ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Thông tin cần cập nhật
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateServiceTypeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cập nhật service type thành công
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "400":
+          description: Bad Request (validation, ID, logic error)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "404":
+          description: Department Not Found
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "409":
+          description: Conflict (service type name đã tồn tại)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update Service Type
+      tags:
+      - Services
+  /admin/services:
+    get:
+      description: Lấy danh sách dịch vụ có phân trang và lọc
+      parameters:
+      - in: query
+        name: is_active
+        type: boolean
+      - in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - enum:
+        - asc
+        - desc
+        in: query
+        name: order
+        type: string
+      - in: query
+        minimum: 1
+        name: page
+        type: integer
+      - in: query
+        name: search
+        type: string
+      - in: query
+        name: service_type_id
+        type: integer
+      - in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lấy danh sách service thành công
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/types.ServiceListResponse'
+              type: object
+        "400":
+          description: Bad Request (query không hợp lệ)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "409":
+          description: Invalid Information
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get Services for Admin
+      tags:
+      - Services
+    post:
+      consumes:
+      - application/json
+      description: Tạo một dịch vụ mới
+      parameters:
+      - description: Thông tin dịch vụ mới
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/types.CreateServiceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Tạo service thành công
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "400":
+          description: Bad Request (validation error)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "404":
+          description: Service type không tìm thấy
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "409":
+          description: Conflict (service name đã tồn tại)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create Service
+      tags:
+      - Services
+  /admin/services/{id}:
+    delete:
+      description: Xoá một dịch vụ bằng ID
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Xoá service thành công
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "400":
+          description: Bad Request (ID không hợp lệ)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "404":
+          description: Service không tìm thấy
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "409":
+          description: Invalid Information
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Service
+      tags:
+      - Services
+    get:
+      description: Lấy thông tin chi tiết của một dịch vụ bằng ID
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lấy thông tin service thành công
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.APIResponse'
+            - properties:
+                data:
+                  properties:
+                    service:
+                      $ref: '#/definitions/types.ServiceResponse'
+                  type: object
+              type: object
+        "400":
+          description: Bad Request (ID không hợp lệ)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "404":
+          description: Service Not Found
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "409":
+          description: Invalid Information
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get Service By ID
+      tags:
+      - Services
+    patch:
+      consumes:
+      - application/json
+      description: Cập nhật thông tin của một dịch vụ bằng ID
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Thông tin cần cập nhật
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateServiceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cập nhật service thành công
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "400":
+          description: Bad Request (validation, ID, logic error)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "404":
+          description: Service Type Not Found
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "409":
+          description: Conflict (service name đã tồn tại)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update Service
+      tags:
+      - Services
+  /admin/users:
+    get:
+      description: Lấy danh sách người dùng có phân trang và lọc
+      parameters:
+      - in: query
+        name: department_id
+        type: integer
+      - in: query
+        name: is_active
+        type: boolean
+      - in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - enum:
+        - asc
+        - desc
+        in: query
+        name: order
+        type: string
+      - in: query
+        minimum: 1
+        name: page
+        type: integer
+      - enum:
+        - admin
+        - staff
+        in: query
+        name: role
+        type: string
+      - in: query
+        name: search
+        type: string
+      - in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lấy danh sách user thành công
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/types.UserListResponse'
+              type: object
+        "400":
+          description: Bad Request (query không hợp lệ)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "409":
+          description: Invalid Information
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get User List
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Tạo một người dùng mới (admin hoặc staff)
+      parameters:
+      - description: Thông tin người dùng mới
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/types.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Tạo user thành công
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.APIResponse'
+            - properties:
+                data:
+                  properties:
+                    id:
+                      format: int64
+                      type: integer
+                  type: object
+              type: object
+        "400":
+          description: Bad Request (validation error hoặc staff thiếu department)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "404":
+          description: Department không tìm thấy
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "409":
+          description: Conflict (email/username/SĐT đã tồn tại)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create User
+      tags:
+      - Users
+  /admin/users/{id}:
+    delete:
+      description: Xoá một người dùng bằng ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Xoá user thành công
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "400":
+          description: Bad Request (ID không hợp lệ)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "404":
+          description: User không tìm thấy
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "409":
+          description: Conflict (không thể xoá bản ghi được bảo vệ)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete User
+      tags:
+      - Users
+    get:
+      description: Lấy thông tin chi tiết của một người dùng bằng ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lấy thông tin user thành công
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.APIResponse'
+            - properties:
+                data:
+                  properties:
+                    user:
+                      $ref: '#/definitions/types.UserResponse'
+                  type: object
+              type: object
+        "400":
+          description: Bad Request (ID không hợp lệ)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "404":
+          description: User Not Found
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "409":
+          description: Invalid Information
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get User By ID
+      tags:
+      - Users
+    patch:
+      consumes:
+      - application/json
+      description: Cập nhật thông tin chi tiết của một người dùng bằng ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Thông tin cần cập nhật
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cập nhật user thành công
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "400":
+          description: Bad Request (validation, ID, logic error)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "404":
+          description: Not Found (user hoặc department)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "409":
+          description: Conflict (email/username/SĐT đã tồn tại)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update User
+      tags:
+      - Users
+  /admin/users/{id}/password:
+    put:
+      consumes:
+      - application/json
+      description: Cập nhật mật khẩu cho một user (thường dùng bởi admin)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Mật khẩu mới
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateUserPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cập nhật mật khẩu thành công
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "400":
+          description: Bad Request (validation hoặc ID không hợp lệ)
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "404":
+          description: User không tìm thấy
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update User Password
+      tags:
+      - Users
   /auth/change-password:
     post:
       consumes:
@@ -696,7 +1650,7 @@ paths:
             - properties:
                 data:
                   properties:
-                    presigned_url:
+                    presigned_urls:
                       items:
                         $ref: '#/definitions/types.ViewPresignedURLResponse'
                       type: array
@@ -713,343 +1667,30 @@ paths:
       summary: Get View Presigned URLs
       tags:
       - Files
-  /roles:
+  /service-types:
     get:
-      description: Lấy danh sách tất cả các vai trò (key và tên hiển thị)
+      description: Lấy tất cả loại dịch vụ cho khách xem
       produces:
       - application/json
       responses:
         "200":
-          description: Lấy danh sách vai trò thành công
+          description: Lấy tất cả service type thành công
           schema:
             allOf:
             - $ref: '#/definitions/types.APIResponse'
             - properties:
                 data:
-                  properties:
-                    roles:
-                      type: object
-                  type: object
+                  items:
+                    $ref: '#/definitions/types.SimpleServiceTypeResponse'
+                  type: array
               type: object
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "409":
-          description: Invalid Information
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-      security:
-      - ApiKeyAuth, RoleAdmin: []
-      summary: Get All Roles
-      tags:
-      - Users
-  /users:
-    get:
-      description: Lấy danh sách người dùng có phân trang và lọc
-      parameters:
-      - in: query
-        name: department_id
-        type: integer
-      - in: query
-        name: is_active
-        type: boolean
-      - in: query
-        maximum: 100
-        minimum: 1
-        name: limit
-        type: integer
-      - enum:
-        - asc
-        - desc
-        in: query
-        name: order
-        type: string
-      - in: query
-        minimum: 1
-        name: page
-        type: integer
-      - enum:
-        - admin
-        - staff
-        in: query
-        name: role
-        type: string
-      - in: query
-        name: search
-        type: string
-      - in: query
-        name: sort
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Lấy danh sách user thành công
-          schema:
-            allOf:
-            - $ref: '#/definitions/types.APIResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/types.UserListResponse'
-              type: object
-        "400":
-          description: Bad Request (query không hợp lệ)
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "409":
-          description: Invalid Information
-          schema:
-            $ref: '#/definitions/types.APIResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/types.APIResponse'
       security:
       - ApiKeyAuth: []
-      summary: Get User List
+      summary: Get Service Types for Guest
       tags:
-      - Users
-    post:
-      consumes:
-      - application/json
-      description: Tạo một người dùng mới (admin hoặc staff)
-      parameters:
-      - description: Thông tin người dùng mới
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/types.CreateUserRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Tạo user thành công
-          schema:
-            allOf:
-            - $ref: '#/definitions/types.APIResponse'
-            - properties:
-                data:
-                  properties:
-                    id:
-                      format: int64
-                      type: integer
-                  type: object
-              type: object
-        "400":
-          description: Bad Request (validation error hoặc staff thiếu department)
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "404":
-          description: Department không tìm thấy
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "409":
-          description: Conflict (email/username/SĐT đã tồn tại)
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-      security:
-      - ApiKeyAuth, RoleAdmin: []
-      summary: Create User
-      tags:
-      - Users
-  /users/{id}:
-    delete:
-      description: Xoá một người dùng bằng ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Xoá user thành công
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "400":
-          description: Bad Request (ID không hợp lệ)
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "404":
-          description: User không tìm thấy
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "409":
-          description: Conflict (không thể xoá bản ghi được bảo vệ)
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-      security:
-      - ApiKeyAuth, RoleAdmin: []
-      summary: Delete User
-      tags:
-      - Users
-    get:
-      description: Lấy thông tin chi tiết của một người dùng bằng ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Lấy thông tin user thành công
-          schema:
-            allOf:
-            - $ref: '#/definitions/types.APIResponse'
-            - properties:
-                data:
-                  properties:
-                    user:
-                      $ref: '#/definitions/types.UserResponse'
-                  type: object
-              type: object
-        "400":
-          description: Bad Request (ID không hợp lệ)
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "404":
-          description: User Not Found
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "409":
-          description: Invalid Information
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-      security:
-      - ApiKeyAuth, RoleAdmin: []
-      summary: Get User By ID
-      tags:
-      - Users
-    patch:
-      consumes:
-      - application/json
-      description: Cập nhật thông tin chi tiết của một người dùng bằng ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Thông tin cần cập nhật
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/types.UpdateUserRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Cập nhật user thành công
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "400":
-          description: Bad Request (validation, ID, logic error)
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "404":
-          description: Not Found (user hoặc department)
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "409":
-          description: Conflict (email/username/SĐT đã tồn tại)
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-      security:
-      - ApiKeyAuth, RoleAdmin: []
-      summary: Update User
-      tags:
-      - Users
-  /users/{id}/password:
-    put:
-      consumes:
-      - application/json
-      description: Cập nhật mật khẩu cho một user (thường dùng bởi admin)
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Mật khẩu mới
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/types.UpdateUserPasswordRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Cập nhật mật khẩu thành công
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "400":
-          description: Bad Request (validation hoặc ID không hợp lệ)
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "404":
-          description: User không tìm thấy
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/types.APIResponse'
-      security:
-      - ApiKeyAuth, RoleAdmin: []
-      summary: Update User Password
-      tags:
-      - Users
+      - Services
 swagger: "2.0"

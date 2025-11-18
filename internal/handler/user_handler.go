@@ -34,7 +34,7 @@ func NewUserHandler(userSvc service.UserService) *UserHandler {
 // @Failure      404      {object}  types.APIResponse  "Department không tìm thấy"
 // @Failure      409      {object}  types.APIResponse  "Conflict (email/username/SĐT đã tồn tại)"
 // @Failure      500      {object}  types.APIResponse  "Internal Server Error"
-// @Router       /users   [post]
+// @Router       /admin/users   [post]
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -85,7 +85,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 // @Failure      404         {object}  types.APIResponse  "User Not Found"
 // @Failure      409         {object}  types.APIResponse  "Invalid Information"
 // @Failure      500         {object}  types.APIResponse  "Internal Server Error"
-// @Router       /users/{id} [get]
+// @Router       /admin/users/{id} [get]
 func (h *UserHandler) GetUserByID(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -125,7 +125,7 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 // @Failure      401    {object}  types.APIResponse  "Unauthorized"
 // @Failure      409    {object}  types.APIResponse  "Invalid Information"
 // @Failure      500    {object}  types.APIResponse  "Internal Server Error"
-// @Router       /users [get]
+// @Router       /admin/users [get]
 func (h *UserHandler) GetUsers(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -156,7 +156,7 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 // @Failure      401    {object}  types.APIResponse  "Unauthorized"
 // @Failure      409    {object}  types.APIResponse  "Invalid Information"
 // @Failure      500    {object}  types.APIResponse  "Internal Server Error"
-// @Router       /roles [get]
+// @Router       /admin/roles [get]
 func (h *UserHandler) GetAllRoles(c *gin.Context) {
 	rolesMap := map[string]string{
 		common.RoleAdminDisplayName: common.RoleAdmin,
@@ -183,7 +183,7 @@ func (h *UserHandler) GetAllRoles(c *gin.Context) {
 // @Failure      404         {object}  types.APIResponse  "Not Found (user hoặc department)"
 // @Failure      409         {object}  types.APIResponse  "Conflict (email/username/SĐT đã tồn tại)"
 // @Failure      500         {object}  types.APIResponse  "Internal Server Error"
-// @Router       /users/{id} [patch]
+// @Router       /admin/users/{id} [patch]
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -233,7 +233,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 // @Failure      401         					{object}  types.APIResponse  "Unauthorized"
 // @Failure      404                  {object}  types.APIResponse  "User không tìm thấy"
 // @Failure      500                  {object}  types.APIResponse  "Internal Server Error"
-// @Router       /users/{id}/password [put]
+// @Router       /admin/users/{id}/password [put]
 func (h *UserHandler) UpdateUserPassword(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -278,7 +278,7 @@ func (h *UserHandler) UpdateUserPassword(c *gin.Context) {
 // @Failure      404  {object}  types.APIResponse  "User không tìm thấy"
 // @Failure      409  {object}  types.APIResponse  "Conflict (không thể xoá bản ghi được bảo vệ)"
 // @Failure      500  {object}  types.APIResponse  "Internal Server Error"
-// @Router       /users/{id} [delete]
+// @Router       /admin/users/{id} [delete]
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
