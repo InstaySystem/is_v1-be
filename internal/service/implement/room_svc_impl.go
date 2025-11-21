@@ -57,10 +57,10 @@ func (s *roomSvcImpl) CreateRoomType(ctx context.Context, userID int64, req type
 	return nil
 }
 
-func (s *roomSvcImpl) GetRoomTypesForAdmin(ctx context.Context) ([]*model.RoomType, error) {
+func (s *roomSvcImpl) GetRoomTypes(ctx context.Context) ([]*model.RoomType, error) {
 	roomTypes, err := s.roomRepo.FindAllRoomTypesWithDetails(ctx)
 	if err != nil {
-		s.logger.Error("get room types for admin failed", zap.Error(err))
+		s.logger.Error("get room types failed", zap.Error(err))
 		return nil, err
 	}
 
@@ -86,10 +86,10 @@ func (s *roomSvcImpl) GetRoomTypesForAdmin(ctx context.Context) ([]*model.RoomTy
 	return roomTypes, nil
 }
 
-func (s *roomSvcImpl) GetRoomTypesForGuest(ctx context.Context) ([]*model.RoomType, error) {
+func (s *roomSvcImpl) GetSimpleRoomTypes(ctx context.Context) ([]*model.RoomType, error) {
 	roomTypes, err := s.roomRepo.FindAllRoomTypes(ctx)
 	if err != nil {
-		s.logger.Error("get room types for guest failed", zap.Error(err))
+		s.logger.Error("get simple room types failed", zap.Error(err))
 		return nil, err
 	}
 
@@ -186,7 +186,7 @@ func (s *roomSvcImpl) CreateRoom(ctx context.Context, userID int64, req types.Cr
 	return nil
 }
 
-func (s *roomSvcImpl) GetRoomsForAdmin(ctx context.Context, query types.RoomPaginationQuery) ([]*model.Room, *types.MetaResponse, error) {
+func (s *roomSvcImpl) GetRooms(ctx context.Context, query types.RoomPaginationQuery) ([]*model.Room, *types.MetaResponse, error) {
 	if query.Page == 0 {
 		query.Page = 1
 	}

@@ -11,7 +11,7 @@ func RoomRouter(rg *gin.RouterGroup, hdl *handler.RoomHandler, authMid *middlewa
 	{
 		admin.POST("/room-types", hdl.CreateRoomType)
 
-		admin.GET("/room-types", hdl.GetRoomTypesForAdmin)
+		admin.GET("/room-types", hdl.GetRoomTypes)
 
 		admin.PUT("/room-types/:id", hdl.UpdateRoomType)
 
@@ -19,7 +19,7 @@ func RoomRouter(rg *gin.RouterGroup, hdl *handler.RoomHandler, authMid *middlewa
 
 		admin.POST("/rooms", hdl.CreateRoom)
 
-		admin.GET("/rooms", hdl.GetRoomsForAdmin)
+		admin.GET("/rooms", hdl.GetRooms)
 
 		admin.PATCH("/rooms/:id", hdl.UpdateRoom)
 
@@ -28,5 +28,5 @@ func RoomRouter(rg *gin.RouterGroup, hdl *handler.RoomHandler, authMid *middlewa
 		admin.GET("/floors", hdl.GetFloors)
 	}
 
-	rg.GET("/room-types", hdl.GetRoomTypesForGuest)
+	rg.GET("/room-types", hdl.GetSimpleRoomTypes)
 }

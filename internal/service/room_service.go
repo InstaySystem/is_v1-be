@@ -10,9 +10,9 @@ import (
 type RoomService interface {
 	CreateRoomType(ctx context.Context, userID int64, req types.CreateRoomTypeRequest) error
 
-	GetRoomTypesForAdmin(ctx context.Context) ([]*model.RoomType, error)
+	GetRoomTypes(ctx context.Context) ([]*model.RoomType, error)
 
-	GetRoomTypesForGuest(ctx context.Context) ([]*model.RoomType, error)
+	GetSimpleRoomTypes(ctx context.Context) ([]*model.RoomType, error)
 
 	UpdateRoomType(ctx context.Context, roomTypeID, userID int64, req types.UpdateRoomTypeRequest) error
 
@@ -26,5 +26,5 @@ type RoomService interface {
 
 	GetFloors(ctx context.Context) ([]*model.Floor, error)
 
-	GetRoomsForAdmin(ctx context.Context, query types.RoomPaginationQuery) ([]*model.Room, *types.MetaResponse, error)
+	GetRooms(ctx context.Context, query types.RoomPaginationQuery) ([]*model.Room, *types.MetaResponse, error)
 }

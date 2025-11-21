@@ -56,11 +56,11 @@ func (h *RoomHandler) CreateRoomType(c *gin.Context) {
 	common.ToAPIResponse(c, http.StatusCreated, "Room type created successfully", nil)
 }
 
-func (h *RoomHandler) GetRoomTypesForAdmin(c *gin.Context) {
+func (h *RoomHandler) GetRoomTypes(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	roomTypes, err := h.roomSvc.GetRoomTypesForAdmin(ctx)
+	roomTypes, err := h.roomSvc.GetRoomTypes(ctx)
 	if err != nil {
 		common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
 		return
@@ -71,11 +71,11 @@ func (h *RoomHandler) GetRoomTypesForAdmin(c *gin.Context) {
 	})
 }
 
-func (h *RoomHandler) GetRoomTypesForGuest(c *gin.Context) {
+func (h *RoomHandler) GetSimpleRoomTypes(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	roomTypes, err := h.roomSvc.GetRoomTypesForGuest(ctx)
+	roomTypes, err := h.roomSvc.GetSimpleRoomTypes(ctx)
 	if err != nil {
 		common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
 		return
@@ -195,7 +195,7 @@ func (h *RoomHandler) CreateRoom(c *gin.Context) {
 	common.ToAPIResponse(c, http.StatusCreated, "Room created successfully", nil)
 }
 
-func (h *RoomHandler) GetRoomsForAdmin(c *gin.Context) {
+func (h *RoomHandler) GetRooms(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
@@ -206,7 +206,7 @@ func (h *RoomHandler) GetRoomsForAdmin(c *gin.Context) {
 		return
 	}
 
-	rooms, meta, err := h.roomSvc.GetRoomsForAdmin(ctx, query)
+	rooms, meta, err := h.roomSvc.GetRooms(ctx, query)
 	if err != nil {
 		common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
 		return
