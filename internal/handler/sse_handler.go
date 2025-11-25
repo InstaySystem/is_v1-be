@@ -40,6 +40,12 @@ func (h *SSEHandler) HandleSSE(c *gin.Context) {
 		return
 	}
 
+	sse.Encode(c.Writer, sse.Event{
+		Event: "connected",
+		Data:  gin.H{"message": "SSE connection established"},
+	})
+	c.Writer.Flush()
+
 	var departmentP *string
 	if department == "" {
 		departmentP = nil
@@ -52,7 +58,7 @@ func (h *SSEHandler) HandleSSE(c *gin.Context) {
 		ClientID:   clientID,
 		Type:       clientType,
 		Department: departmentP,
-		Chan:       make(chan []byte),
+		Chan:       make(chan []byte, 256),
 		Done:       make(chan bool),
 	}
 
@@ -71,6 +77,7 @@ func (h *SSEHandler) HandleSSE(c *gin.Context) {
 		case message := <-client.Chan:
 			var msg types.SSEEventData
 			if err := json.Unmarshal(message, &msg); err != nil {
+				fmt.Printf("[SSE] Error unmarshaling message: %v\n", err)
 				sse.Encode(c.Writer, sse.Event{
 					Event: "error",
 					Data:  gin.H{"message": fmt.Sprintf("%v", err)},

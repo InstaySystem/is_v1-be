@@ -144,5 +144,5 @@ func (h *SSEHub) SendToClient(clientID int64, event types.SSEEventData) {
 		fmt.Println("[SSE-DEBUG] >>> SKIPPED: Event type or Department condition invalid.")
 	}
 	h.Mutex.RUnlock()
-	fmt.Println("[SSE-DEBUG] <--- End SendToClient\n")
+	fmt.Println("[SSE-DEBUG] <--- End SendToClient")
 }

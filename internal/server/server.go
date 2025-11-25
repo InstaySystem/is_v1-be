@@ -71,6 +71,8 @@ func NewServer(cfg *config.Config) (*Server, error) {
 	listenWorker := worker.NewListenWorker(cfg, ctn.BookingRepo, ctn.SfGen, logger)
 	listenWorker.Start()
 
+	go ctn.SSEHub.Run()
+
 	r := gin.Default()
 	if err = r.SetTrustedProxies([]string{"127.0.0.1"}); err != nil {
 		return nil, fmt.Errorf("setup Proxy failed: %w", err)
@@ -111,7 +113,7 @@ func NewServer(cfg *config.Config) (*Server, error) {
 		MaxHeaderBytes: cfg.Server.MaxHeaderBytes * 1024 * 1024,
 		IdleTimeout:    cfg.Server.IdleTimeout * time.Second,
 		ReadTimeout:    cfg.Server.ReadTimeout * time.Second,
-		WriteTimeout:   cfg.Server.ReadTimeout * time.Second,
+		WriteTimeout:   cfg.Server.WriteTimeout * time.Second,
 	}
 
 	return &Server{

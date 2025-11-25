@@ -301,7 +301,11 @@ func (m *AuthMiddleware) IsClient() gin.HandlerFunc {
 				}
 				c.Set("client_id", user.ID)
 				c.Set("client_type", "staff")
-				c.Set("department", user.Department)
+				if user.Department != nil {
+					c.Set("department", user.Department.Name)
+				} else {
+					c.Set("department", nil)
+				}
 				c.Next()
 				return
 			}
