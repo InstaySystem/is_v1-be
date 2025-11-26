@@ -99,11 +99,11 @@ type SimpleServiceTypeResponse struct {
 	Slug string `json:"slug"`
 }
 
-type SimpleServiceTypeWithBaseServices struct {
-	ID       int64                  `json:"id"`
-	Name     string                 `json:"name"`
-	Slug     string                 `json:"slug"`
-	Services []*BaseServiceResponse `json:"services"`
+type SimpleServiceTypeWithBasicServices struct {
+	ID       int64                   `json:"id"`
+	Name     string                  `json:"name"`
+	Slug     string                  `json:"slug"`
+	Services []*BasicServiceResponse `json:"services"`
 }
 
 type SimpleServiceImageResponse struct {
@@ -118,7 +118,7 @@ type ServiceImageResponse struct {
 	SortOrder   uint32 `json:"sort_order"`
 }
 
-type BaseServiceResponse struct {
+type BasicServiceResponse struct {
 	ID          int64                       `json:"id"`
 	Name        string                      `json:"name"`
 	Slug        string                      `json:"slug"`
@@ -231,14 +231,45 @@ type RoomResponse struct {
 }
 
 type SimpleOrderServiceResponse struct {
-	ID           int64                `json:"id"`
-	Code         string               `json:"code"`
-	Service      *BaseServiceResponse `json:"service"`
-	Quantity     uint32               `json:"quantity"`
-	TotalPrice   float64              `json:"total_price"`
-	Status       string               `json:"status"`
-	CreatedAt    time.Time            `json:"created_at"`
-	GuestNote    *string              `json:"guest_note"`
-	StaffNote    *string              `json:"staff_note"`
-	CancelReason *string              `json:"cancel_reason"`
+	ID           int64                 `json:"id"`
+	Code         string                `json:"code"`
+	Service      *BasicServiceResponse `json:"service"`
+	Quantity     uint32                `json:"quantity"`
+	TotalPrice   float64               `json:"total_price"`
+	Status       string                `json:"status"`
+	CreatedAt    time.Time             `json:"created_at"`
+	GuestNote    *string               `json:"guest_note"`
+	StaffNote    *string               `json:"staff_note"`
+	CancelReason *string               `json:"cancel_reason"`
+}
+
+type BasicOrderServiceResponse struct {
+	ID          int64   `json:"id"`
+	Code        string  `json:"code"`
+	ServiceName string  `json:"service_name"`
+	RoomName    string  `json:"room_name"`
+	Quantity    uint32  `json:"quantity"`
+	TotalPrice  float64 `json:"total_price"`
+	Status      string  `json:"status"`
+}
+
+type OrderServiceResponse struct {
+	ID           int64                    `json:"id"`
+	Code         string                   `json:"code"`
+	Service      *BasicServiceResponse    `json:"service"`
+	OrderRoom    *SimpleOrderRoomResponse `json:"order_room"`
+	Quantity     uint32                   `json:"quantity"`
+	TotalPrice   float64                  `json:"total_price"`
+	Status       string                   `json:"status"`
+	CreatedAt    time.Time                `json:"created_at"`
+	UpdatedAt    time.Time                `json:"updated_at"`
+	GuestNote    *string                  `json:"guest_note"`
+	StaffNote    *string                  `json:"staff_note"`
+	CancelReason *string                  `json:"cancel_reason"`
+	UpdatedBy    *BasicUserResponse       `json:"updated_by"`
+}
+
+type SimpleOrderRoomResponse struct {
+	ID   int64               `json:"id"`
+	Room *SimpleRoomResponse `json:"room"`
 }

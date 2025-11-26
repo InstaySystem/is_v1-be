@@ -220,12 +220,12 @@ func ToSimpleServiceImageResponse(image *model.ServiceImage) *types.SimpleServic
 	}
 }
 
-func ToBaseServiceResponse(service *model.Service) *types.BaseServiceResponse {
+func ToBasicServiceResponse(service *model.Service) *types.BasicServiceResponse {
 	if service == nil {
 		return nil
 	}
 
-	return &types.BaseServiceResponse{
+	return &types.BasicServiceResponse{
 		ID:          service.ID,
 		Name:        service.Name,
 		Slug:        service.Slug,
@@ -251,29 +251,29 @@ func ToSimpleServiceResponse(service *model.Service) *types.SimpleServiceRespons
 	}
 }
 
-func ToBaseServicesResponse(services []*model.Service) []*types.BaseServiceResponse {
+func ToBasicServicesResponse(services []*model.Service) []*types.BasicServiceResponse {
 	if len(services) == 0 {
-		return make([]*types.BaseServiceResponse, 0)
+		return make([]*types.BasicServiceResponse, 0)
 	}
 
-	servicesRes := make([]*types.BaseServiceResponse, 0, len(services))
+	servicesRes := make([]*types.BasicServiceResponse, 0, len(services))
 	for _, service := range services {
-		servicesRes = append(servicesRes, ToBaseServiceResponse(service))
+		servicesRes = append(servicesRes, ToBasicServiceResponse(service))
 	}
 
 	return servicesRes
 }
 
-func ToSimpleServiceTypeWithBaseServices(serviceType *model.ServiceType) *types.SimpleServiceTypeWithBaseServices {
+func ToSimpleServiceTypeWithBasicServices(serviceType *model.ServiceType) *types.SimpleServiceTypeWithBasicServices {
 	if serviceType == nil {
 		return nil
 	}
 
-	return &types.SimpleServiceTypeWithBaseServices{
+	return &types.SimpleServiceTypeWithBasicServices{
 		ID:       serviceType.ID,
 		Name:     serviceType.Name,
 		Slug:     serviceType.Slug,
-		Services: ToBaseServicesResponse(serviceType.Services),
+		Services: ToBasicServicesResponse(serviceType.Services),
 	}
 }
 
@@ -534,7 +534,7 @@ func ToSimpleOrderServiceResponse(orderService *model.OrderService) *types.Simpl
 	return &types.SimpleOrderServiceResponse{
 		ID:           orderService.ID,
 		Code:         orderService.Code,
-		Service:      ToBaseServiceResponse(orderService.Service),
+		Service:      ToBasicServiceResponse(orderService.Service),
 		Quantity:     orderService.Quantity,
 		TotalPrice:   orderService.TotalPrice,
 		Status:       orderService.Status,
@@ -542,5 +542,67 @@ func ToSimpleOrderServiceResponse(orderService *model.OrderService) *types.Simpl
 		StaffNote:    orderService.StaffNote,
 		CancelReason: orderService.CancelReason,
 		CreatedAt:    orderService.CreatedAt,
+	}
+}
+
+func ToBasicOrderServiceResponse(orderService *model.OrderService) *types.BasicOrderServiceResponse {
+	if orderService == nil {
+		return nil
+	}
+
+	return &types.BasicOrderServiceResponse{
+		ID:          orderService.ID,
+		Code:        orderService.Code,
+		ServiceName: orderService.Service.Name,
+		RoomName:    orderService.OrderRoom.Room.Name,
+		Quantity:    orderService.Quantity,
+		TotalPrice:  orderService.TotalPrice,
+		Status:      orderService.Status,
+	}
+}
+
+func ToBasicOrderServicesResponse(orderServices []*model.OrderService) []*types.BasicOrderServiceResponse {
+	if len(orderServices) == 0 {
+		return make([]*types.BasicOrderServiceResponse, 0)
+	}
+
+	orderServicesRes := make([]*types.BasicOrderServiceResponse, 0, len(orderServices))
+	for _, orderService := range orderServices {
+		orderServicesRes = append(orderServicesRes, ToBasicOrderServiceResponse(orderService))
+	}
+
+	return orderServicesRes
+}
+
+func ToSimpleOrderRoomResponse(orderRoom *model.OrderRoom) *types.SimpleOrderRoomResponse {
+	if orderRoom == nil {
+		return nil
+	}
+
+	return &types.SimpleOrderRoomResponse{
+		ID:   orderRoom.ID,
+		Room: ToSimpleRoomResponse(orderRoom.Room),
+	}
+}
+
+func ToOrderServiceResponse(orderService *model.OrderService) *types.OrderServiceResponse {
+	if orderService == nil {
+		return nil
+	}
+
+	return &types.OrderServiceResponse{
+		ID:           orderService.ID,
+		Code:         orderService.Code,
+		Service:      ToBasicServiceResponse(orderService.Service),
+		OrderRoom:    ToSimpleOrderRoomResponse(orderService.OrderRoom),
+		Quantity:     orderService.Quantity,
+		TotalPrice:   orderService.TotalPrice,
+		Status:       orderService.Status,
+		CreatedAt:    orderService.CreatedAt,
+		UpdatedAt:    orderService.UpdatedAt,
+		GuestNote:    orderService.GuestNote,
+		StaffNote:    orderService.StaffNote,
+		CancelReason: orderService.CancelReason,
+		UpdatedBy:    ToBasicUserResponse(orderService.UpdatedBy),
 	}
 }

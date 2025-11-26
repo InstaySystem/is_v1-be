@@ -287,7 +287,7 @@ func (h *ServiceHandler) GetServicesForAdmin(c *gin.Context) {
 	}
 
 	common.ToAPIResponse(c, http.StatusOK, "Get service list successfully", gin.H{
-		"services": common.ToBaseServicesResponse(services),
+		"services": common.ToBasicServicesResponse(services),
 		"meta":     meta,
 	})
 }
@@ -476,7 +476,7 @@ func (h *ServiceHandler) GetServiceTypeBySlugWithServices(c *gin.Context) {
 	}
 
 	common.ToAPIResponse(c, http.StatusOK, "Get service type information successfully", gin.H{
-		"service_type": common.ToSimpleServiceTypeWithBaseServices(serviceType),
+		"service_type": common.ToSimpleServiceTypeWithBasicServices(serviceType),
 	})
 }
 

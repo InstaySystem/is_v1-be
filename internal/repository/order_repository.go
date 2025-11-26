@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/InstaySystem/is-be/internal/model"
+	"github.com/InstaySystem/is-be/internal/types"
 	"gorm.io/gorm"
 )
 
@@ -21,4 +22,8 @@ type OrderRepository interface {
 	UpdateOrderServiceTx(ctx context.Context, tx *gorm.DB, orderServiceID int64, updateData map[string]any) error
 
 	FindOrderServiceByCodeWithServiceDetails(ctx context.Context, orderServiceCode string) (*model.OrderService, error)
+
+	FindOrderServiceByIDWithDetails(ctx context.Context, orderServiceID int64) (*model.OrderService, error)
+
+	FindAllOrderServicesWithDetailsPaginated(ctx context.Context, query types.OrderServicePaginationQuery, departmentID *int64) ([]*model.OrderService, int64, error)
 }

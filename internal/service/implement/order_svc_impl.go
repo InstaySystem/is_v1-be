@@ -181,7 +181,7 @@ func (s *orderSvcImpl) CreateOrderService(ctx context.Context, orderRoomID int64
 
 	orderService := &model.OrderService{
 		ID:          orderServiceID,
-		Code:        common.GenerateCode(10),
+		Code:        common.GenerateCode(5),
 		OrderRoomID: orderRoomID,
 		ServiceID:   req.ServiceID,
 		Quantity:    req.Quantity,
@@ -252,21 +252,70 @@ func (s *orderSvcImpl) CreateOrderService(ctx context.Context, orderRoomID int64
 func (s *orderSvcImpl) GetOrderServiceByCode(ctx context.Context, orderRoomID int64, orderServiceCode string) (*model.OrderService, error) {
 	orderService, err := s.orderRepo.FindOrderServiceByCodeWithServiceDetails(ctx, orderServiceCode)
 	if err != nil {
-		s.logger.Error("find order room by id failed", zap.String("code", orderServiceCode), zap.Error(err))
+		s.logger.Error("find order service by code failed", zap.String("code", orderServiceCode), zap.Error(err))
 		return nil, err
 	}
-	if orderService == nil {
+	if orderService == nil || orderService.OrderRoomID != orderRoomID {
 		return nil, common.ErrOrderServiceNotFound
 	}
 
-	if orderService.OrderRoomID != orderRoomID {
-		return nil, common.ErrForbidden
+	updateData := map[string]any{
+		"read_at": time.Now(),
+		"is_read": true,
+	}
+	if err = s.notificationRepo.UpdateReadNotificationsByContentIDAndTypeAndReceiver(ctx, orderService.ID, "service", "guest", updateData); err != nil {
+		s.logger.Error("update read service notification failed", zap.Int64("id", orderService.ID), zap.Error(err))
+		return nil, err
 	}
 
 	return orderService, nil
 }
 
-func (s *orderSvcImpl) CancelOrderService(ctx context.Context, orderRoomID, orderServiceID int64) error {
+func (s *orderSvcImpl) GetOrderServiceByID(ctx context.Context, userID int64, orderServiceID int64, departmentID *int64) (*model.OrderService, error) {
+	orderService, err := s.orderRepo.FindOrderServiceByIDWithDetails(ctx, orderServiceID)
+	if err != nil {
+		s.logger.Error("find order service by id failed", zap.Int64("id", orderServiceID), zap.Error(err))
+		return nil, err
+	}
+	if orderService == nil {
+		return nil, common.ErrOrderServiceNotFound
+	}
+	if departmentID != nil && orderService.Service.ServiceType.DepartmentID != *departmentID {
+		return nil, common.ErrOrderServiceNotFound
+	}
+
+	notifications, err := s.notificationRepo.FindAllUnReadNotificationsByContentIDAndTypeAndReceiver(ctx, userID, orderServiceID, "service", "staff")
+	if err != nil {
+		s.logger.Error("find unread notifications failed", zap.Error(err))
+		return nil, err
+	}
+
+	if len(notifications) > 0 {
+		notificationStaffs := make([]*model.NotificationStaff, 0, len(notifications))
+		for _, notification := range notifications {
+			id, err := s.sfGen.NextID()
+			if err != nil {
+				s.logger.Error("generate notification staff ID failed", zap.Error(err))
+				return nil, err
+			}
+
+			notificationStaffs = append(notificationStaffs, &model.NotificationStaff{
+				ID:             id,
+				NotificationID: notification.ID,
+				StaffID:        userID,
+			})
+		}
+
+		if err = s.notificationRepo.CreateNotificationStaffs(ctx, notificationStaffs); err != nil {
+			s.logger.Error("create notification staffs failed", zap.Error(err))
+			return nil, err
+		}
+	}
+
+	return orderService, nil
+}
+
+func (s *orderSvcImpl) UpdateOrderServiceForGuest(ctx context.Context, orderRoomID, orderServiceID int64, status string) error {
 	orderRoom, err := s.orderRepo.FindOrderRoomByIDWithRoom(ctx, orderRoomID)
 	if err != nil {
 		s.logger.Error("find order room by id failed", zap.Int64("id", orderRoomID), zap.Error(err))
@@ -289,11 +338,11 @@ func (s *orderSvcImpl) CancelOrderService(ctx context.Context, orderRoomID, orde
 			return common.ErrOrderServiceNotFound
 		}
 
-		if orderService.Status != "pending" {
+		if orderService.Status != "pending" || status != "canceled" {
 			return common.ErrInvalidStatus
 		}
 
-		if err = s.orderRepo.UpdateOrderServiceTx(ctx, tx, orderServiceID, map[string]any{"status": "canceled"}); err != nil {
+		if err = s.orderRepo.UpdateOrderServiceTx(ctx, tx, orderServiceID, map[string]any{"status": status}); err != nil {
 			s.logger.Error("cancel order service failed", zap.Int64("id", orderServiceID), zap.Error(err))
 			return err
 		}
@@ -346,4 +395,35 @@ func (s *orderSvcImpl) CancelOrderService(ctx context.Context, orderRoomID, orde
 	}
 
 	return nil
+}
+
+func (s *orderSvcImpl) GetOrderServices(ctx context.Context, query types.OrderServicePaginationQuery, departmentID *int64) ([]*model.OrderService, *types.MetaResponse, error) {
+	if query.Page == 0 {
+		query.Page = 1
+	}
+	if query.Limit == 0 {
+		query.Limit = 10
+	}
+
+	orderServices, total, err := s.orderRepo.FindAllOrderServicesWithDetailsPaginated(ctx, query, departmentID)
+	if err != nil {
+		s.logger.Error("find all order services paginated failed", zap.Error(err))
+		return nil, nil, err
+	}
+
+	totalPages := uint32(total) / query.Limit
+	if uint32(total)%query.Limit != 0 {
+		totalPages++
+	}
+
+	meta := &types.MetaResponse{
+		Total:      uint64(total),
+		Page:       query.Page,
+		Limit:      query.Limit,
+		TotalPages: uint16(totalPages),
+		HasPrev:    query.Page > 1,
+		HasNext:    query.Page < totalPages,
+	}
+
+	return orderServices, meta, nil
 }

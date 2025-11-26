@@ -101,9 +101,10 @@ func (w *MQWorker) startSendServiceNotification() {
 		}
 
 		data := map[string]any{
-			"content":    serviceNotificationMsg.Content,
-			"content_id": serviceNotificationMsg.ContentID,
-			"type":       serviceNotificationMsg.Type,
+			"content":      serviceNotificationMsg.Content,
+			"content_id":   serviceNotificationMsg.ContentID,
+			"content_type": serviceNotificationMsg.Type,
+			"receiver":     serviceNotificationMsg.Receiver,
 		}
 
 		event := types.SSEEventData{

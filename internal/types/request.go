@@ -196,9 +196,9 @@ type BookingPaginationQuery struct {
 	Limit  uint32 `form:"limit" binding:"omitempty,min=1,max=100" json:"limit"`
 	Sort   string `form:"sort" json:"sort"`
 	Order  string `form:"order" binding:"omitempty,oneof=asc desc" json:"order"`
-	Filter string `form:"filter" binding:"omitempty"`
-	From   string `form:"from"   binding:"omitempty,datetime=2006-01-02"`
-	To     string `form:"to"     binding:"omitempty,datetime=2006-01-02"`
+	Filter string `form:"filter" binding:"omitempty" json:"filter"`
+	From   string `form:"from"   binding:"omitempty,datetime=2006-01-02" json:"from"`
+	To     string `form:"to"     binding:"omitempty,datetime=2006-01-02" json:"to"`
 	Search string `form:"search" json:"search"`
 }
 
@@ -215,4 +215,20 @@ type CreateOrderServiceRequest struct {
 	ServiceID int64   `json:"service_id" binding:"required"`
 	Quantity  uint32  `json:"quantity" binding:"required,min=1"`
 	GuestNote *string `json:"guest_note" binding:"omitempty,min=1"`
+}
+
+type UpdateOrderServiceRequest struct {
+	Status string `json:"status" binding:"required,oneof=rejected accepted canceled"`
+}
+
+type OrderServicePaginationQuery struct {
+	Page   uint32 `form:"page" binding:"omitempty,min=1" json:"page"`
+	Limit  uint32 `form:"limit" binding:"omitempty,min=1,max=100" json:"limit"`
+	Sort   string `form:"sort" json:"sort"`
+	Order  string `form:"order" binding:"omitempty,oneof=asc desc" json:"order"`
+	Filter string `form:"filter" binding:"omitempty" json:"filter"`
+	From   string `form:"from"   binding:"omitempty,datetime=2006-01-02" json:"from"`
+	To     string `form:"to"     binding:"omitempty,datetime=2006-01-02" json:"to"`
+	Search string `form:"search" json:"search"`
+	Status string `form:"status" binding:"omitempty,oneof=accepted pending rejected canceled" json:"status"`
 }

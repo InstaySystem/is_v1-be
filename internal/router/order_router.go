@@ -14,6 +14,13 @@ func OrderRouter(rg *gin.RouterGroup, hdl *handler.OrderHandler, authMid *middle
 		admin.GET("/orders/rooms/:id", hdl.GetOrderRoomByID)
 	}
 
+	admin = rg.Group("/admin", authMid.IsAuthentication())
+	{
+		admin.GET("/orders/services", hdl.GetOrderServices)
+
+		admin.GET("/orders/services/:id", hdl.GetOrderServiceByID)
+	}
+
 	rg.POST("/orders/rooms/verify", hdl.VerifyOrderRoom)
 
 	guest := rg.Group("/orders", authMid.HasGuestToken())
@@ -22,6 +29,6 @@ func OrderRouter(rg *gin.RouterGroup, hdl *handler.OrderHandler, authMid *middle
 
 		guest.GET("/services/:code", hdl.GetOrderServiceByCode)
 
-		guest.DELETE("/services/:id", hdl.CancelOrderService)
+		guest.PUT("/services/:id", hdl.UpdateOrderServiceForGuest)
 	}
 }
