@@ -21,23 +21,24 @@ import (
 )
 
 type Container struct {
-	FileCtn       *FileContainer
-	AuthCtn       *AuthContainer
-	UserCtn       *UserContainer
-	DepartmentCtn *DepartmentContainer
-	ServiceCtn    *ServiceContainer
-	RequestCtn    *RequestContainer
-	RoomCtn       *RoomContainer
-	BookingCtn    *BookingContainer
-	OrderCtn      *OrderContainer
-	SSECtn        *SSEContainer
-	AuthMid       *middleware.AuthMiddleware
-	ReqMid        *middleware.RequestMiddleware
-	SMTPProvider  smtp.SMTPProvider
-	MQProvider    mq.MessageQueueProvider
-	SfGen         snowflake.Generator
-	BookingRepo   repository.BookingRepository
-	SSEHub        *hub.SSEHub
+	FileCtn         *FileContainer
+	AuthCtn         *AuthContainer
+	UserCtn         *UserContainer
+	DepartmentCtn   *DepartmentContainer
+	ServiceCtn      *ServiceContainer
+	RequestCtn      *RequestContainer
+	RoomCtn         *RoomContainer
+	BookingCtn      *BookingContainer
+	OrderCtn        *OrderContainer
+	NotificationCtn *NotificationContainer
+	SSECtn          *SSEContainer
+	AuthMid         *middleware.AuthMiddleware
+	ReqMid          *middleware.RequestMiddleware
+	SMTPProvider    smtp.SMTPProvider
+	MQProvider      mq.MessageQueueProvider
+	SfGen           snowflake.Generator
+	BookingRepo     repository.BookingRepository
+	SSEHub          *hub.SSEHub
 }
 
 func NewContainer(
@@ -76,6 +77,7 @@ func NewContainer(
 	roomCtn := NewRoomContainer(roomRepo, sfGen, logger)
 	bookingCtn := NewBookingContainer(db, logger)
 	orderCtn := NewOrderContainer(db, orderRepo, bookingRepo, serviceRepo, notificationRepo, sfGen, logger, cacheProvider, jwtProvider, mqProvider, cfg.JWT.GuestName)
+	notificationCtn := NewNotificationContainer(notificationRepo, logger, sfGen)
 	sseCtn := NewSSEContainer(sseHub)
 
 	authMid := middleware.NewAuthMiddleware(cfg.JWT.AccessName, cfg.JWT.RefreshName, cfg.JWT.GuestName, userRepo, jwtProvider, logger, cacheProvider)
@@ -91,6 +93,7 @@ func NewContainer(
 		roomCtn,
 		bookingCtn,
 		orderCtn,
+		notificationCtn,
 		sseCtn,
 		authMid,
 		reqMid,

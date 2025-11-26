@@ -5,6 +5,7 @@ import (
 
 	"github.com/InstaySystem/is-be/internal/model"
 	"github.com/InstaySystem/is-be/internal/repository"
+	"github.com/InstaySystem/is-be/internal/types"
 	"gorm.io/gorm"
 )
 
@@ -30,7 +31,7 @@ func (r *notificationRepoImpl) UpdateReadNotificationsByContentIDAndTypeAndRecei
 
 func (r *notificationRepoImpl) FindAllUnReadNotificationsByContentIDAndTypeAndReceiver(ctx context.Context, staffID, contentID int64, contentType, receiver string) ([]*model.Notification, error) {
 	var notifications []*model.Notification
-	if err := r.db.WithContext(ctx).Preload("StaffRead", "staff_id = ?").Where("content_id = ? AND type = ? AND receiver = ?", contentID, contentType, receiver).Where("id NOT IN (?)",
+	if err := r.db.WithContext(ctx).Where("content_id = ? AND type = ? AND receiver = ?", contentID, contentType, receiver).Where("id NOT IN (?)",
 		r.db.Model(&model.NotificationStaff{}).
 			Select("notification_id").
 			Where("staff_id = ?", staffID),
@@ -39,4 +40,48 @@ func (r *notificationRepoImpl) FindAllUnReadNotificationsByContentIDAndTypeAndRe
 	}
 
 	return notifications, nil
+}
+
+func (r *notificationRepoImpl) FindAllUnReadNotificationsByDepartmentID(ctx context.Context, staffID, departmentID int64) ([]*model.Notification, error) {
+	var notifications []*model.Notification
+	if err := r.db.WithContext(ctx).Where("department_id = ? AND receiver = ?", departmentID, "staff").Where("id NOT IN (?)",
+		r.db.Model(&model.NotificationStaff{}).
+			Select("notification_id").
+			Where("staff_id = ?", staffID),
+	).Order("created_at DESC").Find(&notifications).Error; err != nil {
+		return nil, err
+	}
+
+	return notifications, nil
+}
+
+func (r *notificationRepoImpl) CountUnReadNotificationsByDepartmentID(ctx context.Context, userID, departmentID int64) (int64, error) {
+	var count int64
+	if err := r.db.WithContext(ctx).Model(&model.Notification{}).Where("department_id = ? AND receiver = ?", departmentID, "staff").
+		Where("id NOT IN (?)",
+			r.db.Model(&model.NotificationStaff{}).
+				Select("notification_id").
+				Where("staff_id = ?", userID),
+		).Count(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
+func (r *notificationRepoImpl) FindAllNotificationsByDepartmentIDWithStaffsReadPaginated(ctx context.Context, query types.NotificationPaginationQuery, staffID, departmentID int64) ([]*model.Notification, int64, error) {
+	var notifications []*model.Notification
+	var total int64
+
+	db := r.db.WithContext(ctx).Where("department_id = ? AND receiver = ?", departmentID, "staff").Model(&model.Notification{})
+	if err := db.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (query.Page - 1) * query.Limit
+	if err := db.Preload("StaffsRead", "staff_id = ?", staffID).Order("created_at DESC").Limit(int(query.Limit)).Offset(int(offset)).Find(&notifications).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return notifications, total, nil
 }

@@ -284,15 +284,15 @@ func (s *orderSvcImpl) GetOrderServiceByID(ctx context.Context, userID int64, or
 		return nil, common.ErrOrderServiceNotFound
 	}
 
-	notifications, err := s.notificationRepo.FindAllUnReadNotificationsByContentIDAndTypeAndReceiver(ctx, userID, orderServiceID, "service", "staff")
+	unreadNotifications, err := s.notificationRepo.FindAllUnReadNotificationsByContentIDAndTypeAndReceiver(ctx, userID, orderServiceID, "service", "staff")
 	if err != nil {
 		s.logger.Error("find unread notifications failed", zap.Error(err))
 		return nil, err
 	}
 
-	if len(notifications) > 0 {
-		notificationStaffs := make([]*model.NotificationStaff, 0, len(notifications))
-		for _, notification := range notifications {
+	if len(unreadNotifications) > 0 {
+		notificationStaffs := make([]*model.NotificationStaff, 0, len(unreadNotifications))
+		for _, notification := range unreadNotifications {
 			id, err := s.sfGen.NextID()
 			if err != nil {
 				s.logger.Error("generate notification staff ID failed", zap.Error(err))
@@ -397,7 +397,7 @@ func (s *orderSvcImpl) UpdateOrderServiceForGuest(ctx context.Context, orderRoom
 	return nil
 }
 
-func (s *orderSvcImpl) GetOrderServices(ctx context.Context, query types.OrderServicePaginationQuery, departmentID *int64) ([]*model.OrderService, *types.MetaResponse, error) {
+func (s *orderSvcImpl) GetOrderServicesForAdmin(ctx context.Context, query types.OrderServicePaginationQuery, departmentID *int64) ([]*model.OrderService, *types.MetaResponse, error) {
 	if query.Page == 0 {
 		query.Page = 1
 	}

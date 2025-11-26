@@ -232,3 +232,8 @@ type OrderServicePaginationQuery struct {
 	Search string `form:"search" json:"search"`
 	Status string `form:"status" binding:"omitempty,oneof=accepted pending rejected canceled" json:"status"`
 }
+
+type NotificationPaginationQuery struct {
+	Page  uint32 `form:"page" binding:"omitempty,min=1" json:"page"`
+	Limit uint32 `form:"limit" binding:"omitempty,min=1,max=100" json:"limit"`
+}

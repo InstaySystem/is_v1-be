@@ -273,3 +273,20 @@ type SimpleOrderRoomResponse struct {
 	ID   int64               `json:"id"`
 	Room *SimpleRoomResponse `json:"room"`
 }
+
+type NotificationStaffResponse struct {
+	ID     int64     `json:"id"`
+	ReadAt time.Time `json:"read_at"`
+}
+
+type SimpleNotificationResponse struct {
+	ID        int64                      `json:"id"`
+	Type      string                     `json:"type"`
+	Content   string                     `json:"content"`
+	ContentID int64                      `json:"content_id"`
+	Receiver  string                     `json:"receiver"`
+	IsRead    bool                       `json:"is_read"`
+	ReadAt    *time.Time                 `json:"read_at"`
+	CreatedAt time.Time                  `json:"created_at"`
+	StaffRead *NotificationStaffResponse `json:"staff_read"`
+}

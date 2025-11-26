@@ -32,21 +32,27 @@ make run
 │   │   ├── 🐹 department_container.go
 │   │   ├── 🐹 file_container.go
 │   │   ├── 🐹 main_container.go
+│   │   ├── 🐹 notification_container.go
 │   │   ├── 🐹 order_container.go
 │   │   ├── 🐹 request_container.go
 │   │   ├── 🐹 room_container.go
 │   │   ├── 🐹 service_container.go
+│   │   ├── 🐹 sse_container.go
 │   │   └── 🐹 user_container.go
 │   ├── 📁 handler
 │   │   ├── 🐹 auth_handler.go
 │   │   ├── 🐹 booking_handler.go
 │   │   ├── 🐹 department_handler.go
 │   │   ├── 🐹 file_handler.go
+│   │   ├── 🐹 notification_handler.go
 │   │   ├── 🐹 order_handler.go
 │   │   ├── 🐹 request_handler.go
 │   │   ├── 🐹 room_handler.go
 │   │   ├── 🐹 service_handler.go
+│   │   ├── 🐹 sse_handler.go
 │   │   └── 🐹 user_handler.go
+│   ├── 📁 hub
+│   │   └── 🐹 sse_hub.go
 │   ├── 📁 initialization
 │   │   ├── 🐹 logger.go
 │   │   ├── 🐹 postgresql.go
@@ -60,6 +66,7 @@ make run
 │   ├── 📁 model
 │   │   ├── 🐹 booking_model.go
 │   │   ├── 🐹 department_model.go
+│   │   ├── 🐹 notification_model.go
 │   │   ├── 🐹 order_model.go
 │   │   ├── 🐹 request_model.go
 │   │   ├── 🐹 room_model.go
@@ -80,6 +87,7 @@ make run
 │   │   ├── 📁 implement
 │   │   │   ├── 🐹 booking_repo_impl.go
 │   │   │   ├── 🐹 department_repo_impl.go
+│   │   │   ├── 🐹 notification_repo_impl.go
 │   │   │   ├── 🐹 order_repo_impl.go
 │   │   │   ├── 🐹 request_repo_impl.go
 │   │   │   ├── 🐹 room_repo_impl.go
@@ -87,6 +95,7 @@ make run
 │   │   │   └── 🐹 user_repo_impl.go
 │   │   ├── 🐹 booking_repository.go
 │   │   ├── 🐹 department_repository.go
+│   │   ├── 🐹 notification_repository.go
 │   │   ├── 🐹 order_repository.go
 │   │   ├── 🐹 request_repository.go
 │   │   ├── 🐹 room_repository.go
@@ -97,10 +106,12 @@ make run
 │   │   ├── 🐹 booking_router.go
 │   │   ├── 🐹 department.go
 │   │   ├── 🐹 file_router.go
+│   │   ├── 🐹 notification_router.go
 │   │   ├── 🐹 order_router.go
 │   │   ├── 🐹 request_router.go
 │   │   ├── 🐹 room_router.go
 │   │   ├── 🐹 service_router.go
+│   │   ├── 🐹 sse_router.go
 │   │   └── 🐹 user_router.go
 │   ├── 📁 server
 │   │   └── 🐹 server.go
@@ -110,6 +121,7 @@ make run
 │   │   │   ├── 🐹 booking_svc_impl.go
 │   │   │   ├── 🐹 department_svc_impl.go
 │   │   │   ├── 🐹 file_svc_impl.go
+│   │   │   ├── 🐹 notification_svc_impl.go
 │   │   │   ├── 🐹 order_svc_impl.go
 │   │   │   ├── 🐹 request_svc_impl.go
 │   │   │   ├── 🐹 room_svc_impl.go
@@ -119,6 +131,7 @@ make run
 │   │   ├── 🐹 booking_service.go
 │   │   ├── 🐹 department_service.go
 │   │   ├── 🐹 file_service.go
+│   │   ├── 🐹 notification_service.go
 │   │   ├── 🐹 order_service.go
 │   │   ├── 🐹 request_service.go
 │   │   ├── 🐹 room_service.go

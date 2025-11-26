@@ -606,3 +606,45 @@ func ToOrderServiceResponse(orderService *model.OrderService) *types.OrderServic
 		UpdatedBy:    ToBasicUserResponse(orderService.UpdatedBy),
 	}
 }
+
+func ToSimpleNotificationResponse(notification *model.Notification) *types.SimpleNotificationResponse {
+	if notification == nil {
+		return nil
+	}
+
+	return &types.SimpleNotificationResponse{
+		ID: notification.ID,
+		Type: notification.Type,
+		Content: notification.Content,
+		ContentID: notification.ContentID,
+		Receiver: notification.Receiver,
+		IsRead: notification.IsRead,
+		ReadAt: notification.ReadAt,
+		CreatedAt: notification.CreatedAt,
+		StaffRead: ToNotificationStaffResponse(notification.StaffsRead[0]),
+	}
+}
+
+func ToSimpleNotificationsResponse(notifications []*model.Notification) []*types.SimpleNotificationResponse {
+	if len(notifications) == 0 {
+		return make([]*types.SimpleNotificationResponse, 0)
+	}
+
+	notificationsRes := make([]*types.SimpleNotificationResponse, 0, len(notifications))
+	for _, notification := range notifications {
+		notificationsRes = append(notificationsRes, ToSimpleNotificationResponse(notification))
+	}
+
+	return notificationsRes
+}
+
+func ToNotificationStaffResponse(notificationStaff *model.NotificationStaff) *types.NotificationStaffResponse {
+	if notificationStaff == nil {
+		return nil
+	}
+
+	return &types.NotificationStaffResponse{
+		ID:     notificationStaff.ID,
+		ReadAt: notificationStaff.ReadAt,
+	}
+}

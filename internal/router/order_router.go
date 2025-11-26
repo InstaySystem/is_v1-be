@@ -16,7 +16,7 @@ func OrderRouter(rg *gin.RouterGroup, hdl *handler.OrderHandler, authMid *middle
 
 	admin = rg.Group("/admin", authMid.IsAuthentication())
 	{
-		admin.GET("/orders/services", hdl.GetOrderServices)
+		admin.GET("/orders/services", hdl.GetOrderServicesForAdmin)
 
 		admin.GET("/orders/services/:id", hdl.GetOrderServiceByID)
 	}

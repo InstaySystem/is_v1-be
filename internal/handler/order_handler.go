@@ -227,7 +227,7 @@ func (h *OrderHandler) UpdateOrderServiceForGuest(c *gin.Context) {
 	common.ToAPIResponse(c, http.StatusOK, "Order service updated successfully", nil)
 }
 
-func (h *OrderHandler) GetOrderServices(c *gin.Context) {
+func (h *OrderHandler) GetOrderServicesForAdmin(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
@@ -257,7 +257,7 @@ func (h *OrderHandler) GetOrderServices(c *gin.Context) {
 		departmentID = &user.Department.ID
 	}
 
-	orderServices, meta, err := h.orderSvc.GetOrderServices(ctx, query, departmentID)
+	orderServices, meta, err := h.orderSvc.GetOrderServicesForAdmin(ctx, query, departmentID)
 	if err != nil {
 		common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
 		return
