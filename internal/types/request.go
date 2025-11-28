@@ -227,7 +227,7 @@ type UpdateRequestRequest struct {
 }
 
 type UpdateOrderServiceRequest struct {
-	Status    string  `json:"status" binding:"required,oneof=rejected accepted canceled"`
+	Status    string  `json:"status" binding:"required,oneof=rejected accepted cancelled"`
 	Reason    *string `json:"reason" binding:"omitempty"`
 	StaffNote *string `json:"staff_note" binding:"omitempty"`
 }
@@ -241,7 +241,7 @@ type OrderServicePaginationQuery struct {
 	From   string `form:"from"   binding:"omitempty,datetime=2006-01-02" json:"from"`
 	To     string `form:"to"     binding:"omitempty,datetime=2006-01-02" json:"to"`
 	Search string `form:"search" json:"search"`
-	Status string `form:"status" binding:"omitempty,oneof=accepted pending rejected canceled" json:"status"`
+	Status string `form:"status" binding:"omitempty,oneof=accepted pending rejected cancelled" json:"status"`
 }
 
 type NotificationPaginationQuery struct {

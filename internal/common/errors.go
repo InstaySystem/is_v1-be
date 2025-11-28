@@ -79,5 +79,7 @@ var (
 
 	ErrOrderServiceNotFound = errors.New("order service not found")
 
+	ErrChatNotFound = errors.New("chat not found")
+
 	ErrInvalidStatus = errors.New("invalid status")
 )

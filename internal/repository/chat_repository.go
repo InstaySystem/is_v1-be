@@ -21,5 +21,9 @@ type ChatRepository interface {
 
 	FindAllChatsByOrderRoomIDWithDetails(ctx context.Context, orderRoomID int64) ([]*model.Chat, error)
 
-	// BulkCreateMessageStaffTx(tx *gorm.DB, chatID, staffID int64) error
+	BulkCreateMessageStaffTx(tx *gorm.DB, chatID, staffID int64) error
+
+	UpdateMessagesByChatIDAndSenderTypeTx(tx *gorm.DB, chatID int64, senderType string, updateData map[string]any) error
+
+	FindChatByIDWithDetailsTx(tx *gorm.DB, chatID, staffID int64) (*model.Chat, error)
 }

@@ -682,6 +682,32 @@ func ToBasicNotificationsResponse(notifications []*model.Notification) []*types.
 	return notificationsRes
 }
 
+func ToSimpleMessagesResponse(messages []*model.Message) []*types.SimpleMessageResponse {
+	if len(messages) == 0 {
+		return make([]*types.SimpleMessageResponse, 0)
+	}
+
+	messagesRes := make([]*types.SimpleMessageResponse, 0, len(messages))
+	for _, message := range messages {
+		messagesRes = append(messagesRes, ToSimpleMessageResponse(message))
+	}
+
+	return messagesRes
+}
+
+func ToSimpleChatWithMessagesResponse(chat *model.Chat) *types.SimpleChatWithMessageResponse {
+	if chat == nil {
+		return nil
+	}
+
+	return &types.SimpleChatWithMessageResponse{
+		ID:        chat.ID,
+		OrderRoom: ToSimpleOrderRoomResponse(chat.OrderRoom),
+		ExpiredAt: chat.ExpiredAt,
+		Messages:  ToSimpleMessagesResponse(chat.Messages),
+	}
+}
+
 func ToSimpleRequestTypeResponse(requestType *model.RequestType) *types.SimpleRequestTypeResponse {
 	if requestType == nil {
 		return nil

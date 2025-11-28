@@ -134,17 +134,43 @@ func (s *chatSvcImpl) GetChatsForGuest(ctx context.Context, orderRoomID int64) (
 }
 
 func (s *chatSvcImpl) GetChatByID(ctx context.Context, chatID, userID, departmentID int64) (*model.Chat, error) {
-	return nil, nil
-	// var chat *model.Chat
-	// if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-	// 	if err := s.chatRepo.BulkCreateMessageStaffTx(tx, chatID, userID); err != nil {
-	// 		s.logger.Error("bulk create message staff failed", zap.Error(err))
-	// 		return err
-	// 	}
-	// 	return nil
-	// }); err != nil {
+	var chat *model.Chat
+	if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := s.chatRepo.BulkCreateMessageStaffTx(tx, chatID, userID); err != nil {
+			s.logger.Error("bulk create message staff failed", zap.Error(err))
+			return err
+		}
 
-	// }
+		updateData := map[string]any{
+			"is_read": true,
+			"read_at": time.Now(),
+		}
+		if err := s.chatRepo.UpdateMessagesByChatIDAndSenderTypeTx(tx, chatID, "guest", updateData); err != nil {
+			s.logger.Error("update read messages failed", zap.Error(err))
+			return err
+		}
+
+		result, err := s.chatRepo.FindChatByIDWithDetailsTx(tx, chatID, userID)
+		if err != nil {
+			s.logger.Error("find chat by id failed", zap.Error(err))
+			return err
+		}
+		if result == nil {
+			return common.ErrChatNotFound
+		}
+
+		if result.DepartmentID != departmentID {
+			return common.ErrForbidden
+		}
+		
+		chat = result
+
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return chat, nil
 }
 
 func (s *chatSvcImpl) getOrCreateChat(tx *gorm.DB, req types.CreateMessageRequest, clientID int64, departmentID *int64, senderType string, now time.Time) (*model.Chat, error) {

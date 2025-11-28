@@ -38,8 +38,26 @@ func (r *chatRepoImpl) FindChatByIDTx(tx *gorm.DB, chatID int64) (*model.Chat, e
 	return &chat, nil
 }
 
+func (r *chatRepoImpl) BulkCreateMessageStaffTx(tx *gorm.DB, chatID, staffID int64) error {
+	query := `
+		INSERT INTO message_staffs (message_id, staff_id, read_at)
+		SELECT id, ?, NOW()
+		FROM messages
+		WHERE chat_id = ? 
+		AND NOT EXISTS (
+			SELECT 1 FROM message_staffs 
+			WHERE message_id = messages.id AND staff_id = ?
+		)
+	`
+	return tx.Exec(query, staffID, chatID, staffID).Error
+}
+
 func (r *chatRepoImpl) UpdateChatTx(tx *gorm.DB, chatID int64, updateData map[string]any) error {
 	return tx.Model(&model.Chat{}).Where("id = ?", chatID).Updates(updateData).Error
+}
+
+func (r *chatRepoImpl) UpdateMessagesByChatIDAndSenderTypeTx(tx *gorm.DB, chatID int64, senderType string, updateData map[string]any) error {
+	return tx.Model(&model.Message{}).Where("chat_id = ? AND sender_type = ? AND is_read = false", chatID, senderType).Updates(updateData).Error
 }
 
 func (r *chatRepoImpl) FindAllChatsByDepartmentIDWithDetailsPaginated(ctx context.Context, query types.ChatPaginationQuery, staffID, departmentID int64) ([]*model.Chat, int64, error) {
@@ -64,6 +82,25 @@ func (r *chatRepoImpl) FindAllChatsByDepartmentIDWithDetailsPaginated(ctx contex
 	}
 
 	return chats, total, nil
+}
+
+func (r *chatRepoImpl) FindChatByIDWithDetailsTx(tx *gorm.DB, chatID, staffID int64) (*model.Chat, error) {
+	var chat model.Chat
+
+	err := tx.
+		Preload("OrderRoom.Room").
+		Preload("OrderRoom.Booking").
+		Preload("Messages", func(db *gorm.DB) *gorm.DB {
+			return db.Order("created_at ASC")
+		}).
+		Preload("Messages.Sender").
+		Preload("Messages.StaffsRead", "staff_id = ?", staffID).
+		First(&chat, chatID).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return &chat, nil
 }
 
 func (r *chatRepoImpl) FindAllChatsByOrderRoomIDWithDetails(ctx context.Context, orderRoomID int64) ([]*model.Chat, error) {

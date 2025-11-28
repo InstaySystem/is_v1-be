@@ -316,7 +316,7 @@ func (s *orderSvcImpl) UpdateOrderServiceForGuest(ctx context.Context, orderRoom
 			return common.ErrOrderServiceNotFound
 		}
 
-		if orderService.Status != "pending" || req.Status != "canceled" {
+		if orderService.Status != "pending" || req.Status != "cancelled" {
 			return common.ErrInvalidStatus
 		}
 

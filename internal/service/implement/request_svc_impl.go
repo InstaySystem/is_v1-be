@@ -262,7 +262,7 @@ func (s *requestSvcImpl) UpdateRequestForGuest(ctx context.Context, orderRoomID,
 			return common.ErrRequestNotFound
 		}
 
-		if request.Status != "pending" || status != "canceled" {
+		if request.Status != "pending" || status != "cancelled" {
 			return common.ErrInvalidStatus
 		}
 

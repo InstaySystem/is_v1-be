@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 	"net/http"
-	// "strconv"
+	"strconv"
 	"time"
 
 	"github.com/InstaySystem/is-be/internal/common"
@@ -64,29 +64,44 @@ func (h *ChatHandler) GetChatsForAdmin(c *gin.Context) {
 }
 
 func (h *ChatHandler) GetChatByID(c *gin.Context) {
-	// ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
-	// defer cancel()
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
 
-	// chatIDStr := c.Param("id")
-	// chatID, err := strconv.ParseInt(chatIDStr, 10, 64)
-	// if err != nil {
-	// 	common.ToAPIResponse(c, http.StatusBadRequest, common.ErrInvalidID.Error(), nil)
-	// 	return
-	// }
+	chatIDStr := c.Param("id")
+	chatID, err := strconv.ParseInt(chatIDStr, 10, 64)
+	if err != nil {
+		common.ToAPIResponse(c, http.StatusBadRequest, common.ErrInvalidID.Error(), nil)
+		return
+	}
 
-	// userAny, exists := c.Get("user")
-	// if !exists {
-	// 	common.ToAPIResponse(c, http.StatusUnauthorized, common.ErrUnAuth.Error(), nil)
-	// 	return
-	// }
+	userAny, exists := c.Get("user")
+	if !exists {
+		common.ToAPIResponse(c, http.StatusUnauthorized, common.ErrUnAuth.Error(), nil)
+		return
+	}
 
-	// user, ok := userAny.(*types.UserData)
-	// if !ok {
-	// 	common.ToAPIResponse(c, http.StatusUnauthorized, common.ErrInvalidUser.Error(), nil)
-	// 	return
-	// }
+	user, ok := userAny.(*types.UserData)
+	if !ok {
+		common.ToAPIResponse(c, http.StatusUnauthorized, common.ErrInvalidUser.Error(), nil)
+		return
+	}
 
-	// chat, err := h.chatSvc.GetChatByID(ctx, chatID, user.ID, user.Department.ID)
+	chat, err := h.chatSvc.GetChatByID(ctx, chatID, user.ID, user.Department.ID)
+	if err != nil {
+		switch err {
+		case common.ErrChatNotFound:
+			common.ToAPIResponse(c, http.StatusNotFound, err.Error(), nil)
+		case common.ErrForbidden:
+			common.ToAPIResponse(c, http.StatusForbidden, err.Error(), nil)
+		default:
+			common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
+		}
+		return
+	}
+
+	common.ToAPIResponse(c, http.StatusOK, "Get chat information successfully", gin.H{
+		"chat": common.ToSimpleChatWithMessagesResponse(chat),
+	})
 }
 
 func (h *ChatHandler) GetChatsForGuest(c *gin.Context) {
