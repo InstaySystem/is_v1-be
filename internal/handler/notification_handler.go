@@ -113,7 +113,7 @@ func (h *NotificationHandler) GetNotificationsForGuest(c *gin.Context) {
 	}
 
 	common.ToAPIResponse(c, http.StatusOK, "Get notification list successfully", gin.H{
-		"notifications": common.ToSimpleNotificationsResponse(notifications),
+		"notifications": common.ToBasicNotificationsResponse(notifications),
 	})
 }
 

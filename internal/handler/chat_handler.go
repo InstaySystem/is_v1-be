@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"net/http"
+	// "strconv"
 	"time"
 
 	"github.com/InstaySystem/is-be/internal/common"
@@ -60,6 +61,32 @@ func (h *ChatHandler) GetChatsForAdmin(c *gin.Context) {
 		"chats": common.ToSimpleChatsResponse(chats),
 		"meta":  meta,
 	})
+}
+
+func (h *ChatHandler) GetChatByID(c *gin.Context) {
+	// ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	// defer cancel()
+
+	// chatIDStr := c.Param("id")
+	// chatID, err := strconv.ParseInt(chatIDStr, 10, 64)
+	// if err != nil {
+	// 	common.ToAPIResponse(c, http.StatusBadRequest, common.ErrInvalidID.Error(), nil)
+	// 	return
+	// }
+
+	// userAny, exists := c.Get("user")
+	// if !exists {
+	// 	common.ToAPIResponse(c, http.StatusUnauthorized, common.ErrUnAuth.Error(), nil)
+	// 	return
+	// }
+
+	// user, ok := userAny.(*types.UserData)
+	// if !ok {
+	// 	common.ToAPIResponse(c, http.StatusUnauthorized, common.ErrInvalidUser.Error(), nil)
+	// 	return
+	// }
+
+	// chat, err := h.chatSvc.GetChatByID(ctx, chatID, user.ID, user.Department.ID)
 }
 
 func (h *ChatHandler) GetChatsForGuest(c *gin.Context) {

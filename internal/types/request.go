@@ -223,7 +223,7 @@ type CreateRequestRequest struct {
 }
 
 type UpdateRequestRequest struct {
-	Status string `json:"status" binding:"required,oneof=done accepted canceled"`
+	Status string `json:"status" binding:"required,oneof=done accepted cancelled"`
 }
 
 type UpdateOrderServiceRequest struct {
@@ -263,7 +263,7 @@ type RequestPaginationQuery struct {
 	From   string `form:"from"   binding:"omitempty,datetime=2006-01-02" json:"from"`
 	To     string `form:"to"     binding:"omitempty,datetime=2006-01-02" json:"to"`
 	Search string `form:"search" json:"search"`
-	Status string `form:"status" binding:"omitempty,oneof=accepted pending rejected canceled" json:"status"`
+	Status string `form:"status" binding:"omitempty,oneof=accepted pending rejected cancelled" json:"status"`
 }
 
 type CreateMessageRequest struct {

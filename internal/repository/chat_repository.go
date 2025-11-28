@@ -20,4 +20,6 @@ type ChatRepository interface {
 	FindAllChatsByDepartmentIDWithDetailsPaginated(ctx context.Context, query types.ChatPaginationQuery, staffID, departmentID int64) ([]*model.Chat, int64, error)
 
 	FindAllChatsByOrderRoomIDWithDetails(ctx context.Context, orderRoomID int64) ([]*model.Chat, error)
+
+	// BulkCreateMessageStaffTx(tx *gorm.DB, chatID, staffID int64) error
 }

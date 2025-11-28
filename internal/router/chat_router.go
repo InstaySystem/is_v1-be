@@ -10,6 +10,8 @@ func ChatRouter(rg *gin.RouterGroup, hdl *handler.ChatHandler, authMid *middlewa
 	admin := rg.Group("/admin/chats", authMid.IsAuthentication())
 	{
 		admin.GET("", hdl.GetChatsForAdmin)
+
+		admin.GET("/:id", hdl.GetChatByID)
 	}
 
 	guest := rg.Group("/chats", authMid.HasGuestToken())

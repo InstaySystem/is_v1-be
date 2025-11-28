@@ -133,6 +133,20 @@ func (s *chatSvcImpl) GetChatsForGuest(ctx context.Context, orderRoomID int64) (
 	return chats, nil
 }
 
+func (s *chatSvcImpl) GetChatByID(ctx context.Context, chatID, userID, departmentID int64) (*model.Chat, error) {
+	return nil, nil
+	// var chat *model.Chat
+	// if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	// 	if err := s.chatRepo.BulkCreateMessageStaffTx(tx, chatID, userID); err != nil {
+	// 		s.logger.Error("bulk create message staff failed", zap.Error(err))
+	// 		return err
+	// 	}
+	// 	return nil
+	// }); err != nil {
+
+	// }
+}
+
 func (s *chatSvcImpl) getOrCreateChat(tx *gorm.DB, req types.CreateMessageRequest, clientID int64, departmentID *int64, senderType string, now time.Time) (*model.Chat, error) {
 	if req.ChatID != nil {
 		chat, err := s.chatRepo.FindChatByIDTx(tx, *req.ChatID)

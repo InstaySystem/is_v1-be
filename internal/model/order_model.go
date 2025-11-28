@@ -28,7 +28,7 @@ type OrderService struct {
 	ServiceID    int64     `gorm:"type:bigint;not null" json:"service_id"`
 	Quantity     uint32    `gorm:"type:integer;not null" json:"quantity"`
 	TotalPrice   float64   `gorm:"type:decimal(10,2);not null" json:"total_price"`
-	Status       string    `gorm:"type:varchar(20);check:status IN ('pending', 'accepted', 'rejected', 'canceled')" json:"status"`
+	Status       string    `gorm:"type:varchar(20);check:status IN ('pending', 'accepted', 'rejected', 'cancelled')" json:"status"`
 	CreatedAt    time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt    time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 	GuestNote    *string   `gorm:"type:text" json:"guest_note"`

@@ -13,4 +13,6 @@ type ChatService interface {
 	GetChatsForAdmin(ctx context.Context, query types.ChatPaginationQuery, userID, departmentID int64) ([]*model.Chat, *types.MetaResponse, error)
 
 	GetChatsForGuest(ctx context.Context, orderRoomID int64) ([]*model.Chat, error)
+
+	GetChatByID(ctx context.Context, chatID, userID, departmentID int64) (*model.Chat, error)
 }

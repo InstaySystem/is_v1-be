@@ -639,6 +639,23 @@ func ToSimpleNotificationResponse(notification *model.Notification) *types.Simpl
 	}
 }
 
+func ToBasicNotificationResponse(notification *model.Notification) *types.BasicNotificationResponse {
+	if notification == nil {
+		return nil
+	}
+
+	return &types.BasicNotificationResponse{
+		ID:        notification.ID,
+		Type:      notification.Type,
+		Content:   notification.Content,
+		ContentID: notification.ContentID,
+		Receiver:  notification.Receiver,
+		IsRead:    notification.IsRead,
+		ReadAt:    notification.ReadAt,
+		CreatedAt: notification.CreatedAt,
+	}
+}
+
 func ToSimpleNotificationsResponse(notifications []*model.Notification) []*types.SimpleNotificationResponse {
 	if len(notifications) == 0 {
 		return make([]*types.SimpleNotificationResponse, 0)
@@ -647,6 +664,19 @@ func ToSimpleNotificationsResponse(notifications []*model.Notification) []*types
 	notificationsRes := make([]*types.SimpleNotificationResponse, 0, len(notifications))
 	for _, notification := range notifications {
 		notificationsRes = append(notificationsRes, ToSimpleNotificationResponse(notification))
+	}
+
+	return notificationsRes
+}
+
+func ToBasicNotificationsResponse(notifications []*model.Notification) []*types.BasicNotificationResponse {
+	if len(notifications) == 0 {
+		return make([]*types.BasicNotificationResponse, 0)
+	}
+
+	notificationsRes := make([]*types.BasicNotificationResponse, 0, len(notifications))
+	for _, notification := range notifications {
+		notificationsRes = append(notificationsRes, ToBasicNotificationResponse(notification))
 	}
 
 	return notificationsRes
