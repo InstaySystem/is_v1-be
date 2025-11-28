@@ -3,11 +3,13 @@ package model
 import "time"
 
 type Chat struct {
-	ID           int64     `gorm:"type:bigint;primaryKey" json:"id"`
-	OrderRoomID  int64     `gorm:"type:bigint;not null" json:"order_room_id"`
-	DepartmentID int64     `gorm:"type:bigint;not null" json:"department_id"`
-	CreatedAt    time.Time `gorm:"autoCreateTime" json:"created_at"`
-	ExpiredAt    time.Time `json:"expired_at"`
+	ID            int64     `gorm:"type:bigint;primaryKey" json:"id"`
+	Code          string    `gorm:"type:char(10);not null;uniqueIndex:chats_code_key" json:"code"`
+	OrderRoomID   int64     `gorm:"type:bigint;not null" json:"order_room_id"`
+	DepartmentID  int64     `gorm:"type:bigint;not null" json:"department_id"`
+	CreatedAt     time.Time `json:"created_at"`
+	ExpiredAt     time.Time `json:"expired_at"`
+	LastMessageAt time.Time `gorm:"not null;index:chats_last_message_at_idx" json:"last_message_at"`
 
 	Department *Department `gorm:"foreignKey:DepartmentID;references:ID;constraint:fk_chats_department,OnUpdate:CASCADE,OnDelete:CASCADE" json:"department"`
 	OrderRoom  *OrderRoom  `gorm:"foreignKey:OrderRoomID;references:ID;constraint:fk_chats_order_room,OnUpdate:CASCADE,OnDelete:CASCADE" json:"order_room"`
@@ -21,7 +23,7 @@ type Message struct {
 	SenderID   *int64     `gorm:"type:bigint" json:"sender_id"`
 	ImageKey   *string    `gorm:"type:varchar(150);uniqueIndex:messages_image_key_key" json:"image_key"`
 	Content    *string    `gorm:"type:text" json:"content"`
-	CreatedAt  time.Time  `gorm:"autoCreateTime" json:"created_at"`
+	CreatedAt  time.Time  `json:"created_at"`
 	IsRead     bool       `gorm:"type:boolean" json:"is_read"`
 	ReadAt     *time.Time `json:"read_at"`
 

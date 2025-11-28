@@ -33,6 +33,7 @@ type Container struct {
 	NotificationCtn *NotificationContainer
 	ChatCtn         *ChatContainer
 	SSECtn          *SSEContainer
+	WSCtn           *WSContainer
 	AuthMid         *middleware.AuthMiddleware
 	ReqMid          *middleware.RequestMiddleware
 	SMTPProvider    smtp.SMTPProvider
@@ -40,6 +41,7 @@ type Container struct {
 	SfGen           snowflake.Generator
 	BookingRepo     repository.BookingRepository
 	SSEHub          *hub.SSEHub
+	WSHub           *hub.WSHub
 }
 
 func NewContainer(
@@ -81,7 +83,9 @@ func NewContainer(
 	orderCtn := NewOrderContainer(db, orderRepo, bookingRepo, serviceRepo, notificationRepo, sfGen, logger, cacheProvider, jwtProvider, mqProvider, cfg.JWT.GuestName)
 	notificationCtn := NewNotificationContainer(notificationRepo, logger, sfGen)
 	chatCtn := NewChatContainer(db, chatRepo, orderRepo, sfGen, logger)
+	wsHub := hub.NewWSHub(chatCtn.Svc)
 	sseCtn := NewSSEContainer(sseHub)
+	wsCtn := NewWSContainer(wsHub)
 
 	authMid := middleware.NewAuthMiddleware(cfg.JWT.AccessName, cfg.JWT.RefreshName, cfg.JWT.GuestName, userRepo, jwtProvider, logger, cacheProvider)
 	reqMid := middleware.NewRequestMiddleware(logger)
@@ -99,6 +103,7 @@ func NewContainer(
 		notificationCtn,
 		chatCtn,
 		sseCtn,
+		wsCtn,
 		authMid,
 		reqMid,
 		smtpProvider,
@@ -106,5 +111,6 @@ func NewContainer(
 		sfGen,
 		bookingRepo,
 		sseHub,
+		wsHub,
 	}
 }

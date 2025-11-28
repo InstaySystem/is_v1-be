@@ -588,12 +588,12 @@ func ToBasicOrderServicesResponse(orderServices []*model.OrderService) []*types.
 	return orderServicesRes
 }
 
-func ToSimpleOrderRoomResponse(orderRoom *model.OrderRoom) *types.SimpleOrderRoomResponse {
+func ToBasicOrderRoomResponse(orderRoom *model.OrderRoom) *types.BasicOrderRoomResponse {
 	if orderRoom == nil {
 		return nil
 	}
 
-	return &types.SimpleOrderRoomResponse{
+	return &types.BasicOrderRoomResponse{
 		ID:   orderRoom.ID,
 		Room: ToSimpleRoomResponse(orderRoom.Room),
 	}
@@ -608,7 +608,7 @@ func ToOrderServiceResponse(orderService *model.OrderService) *types.OrderServic
 		ID:           orderService.ID,
 		Code:         orderService.Code,
 		Service:      ToBasicServiceResponse(orderService.Service),
-		OrderRoom:    ToSimpleOrderRoomResponse(orderService.OrderRoom),
+		OrderRoom:    ToBasicOrderRoomResponse(orderService.OrderRoom),
 		Quantity:     orderService.Quantity,
 		TotalPrice:   orderService.TotalPrice,
 		Status:       orderService.Status,
@@ -725,7 +725,7 @@ func ToRequestResponse(request *model.Request) *types.RequestResponse {
 		ID:          request.ID,
 		Code:        request.Code,
 		RequestType: ToSimpleRequestTypeResponse(request.RequestType),
-		OrderRoom:   ToSimpleOrderRoomResponse(request.OrderRoom),
+		OrderRoom:   ToBasicOrderRoomResponse(request.OrderRoom),
 		Content:     request.Content,
 		Status:      request.Status,
 		CreatedAt:   request.CreatedAt,
@@ -749,6 +749,35 @@ func ToBasicRequestResponse(request *model.Request) *types.BasicRequestResponse 
 	}
 }
 
+func ToMessageStaffResponse(messageStaff *model.MessageStaff) *types.MessageStaffResponse {
+	if messageStaff == nil {
+		return nil
+	}
+
+	return &types.MessageStaffResponse{
+		ID:     messageStaff.ID,
+		ReadAt: messageStaff.ReadAt,
+	}
+}
+
+func ToSimpleMessageResponse(message *model.Message) *types.SimpleMessageResponse {
+	if message == nil {
+		return nil
+	}
+
+	return &types.SimpleMessageResponse{
+		ID:         message.ID,
+		Content:    message.Content,
+		ImageKey:   message.ImageKey,
+		SenderType: message.SenderType,
+		Sender:     ToBasicUserResponse(message.Sender),
+		CreatedAt:  message.CreatedAt,
+		IsRead:     message.IsRead,
+		ReadAt:     message.ReadAt,
+		StaffRead:  ToMessageStaffResponse(message.StaffsRead[0]),
+	}
+}
+
 func ToBasicRequestsResponse(requests []*model.Request) []*types.BasicRequestResponse {
 	if len(requests) == 0 {
 		return make([]*types.BasicRequestResponse, 0)
@@ -760,4 +789,43 @@ func ToBasicRequestsResponse(requests []*model.Request) []*types.BasicRequestRes
 	}
 
 	return requestsRes
+}
+
+func ToSimpleOrderRoomResponse(orderRoom *model.OrderRoom) *types.SimpleOrderRoomResponse {
+	if orderRoom == nil {
+		return nil
+	}
+
+	return &types.SimpleOrderRoomResponse{
+		ID:      orderRoom.ID,
+		Room:    ToSimpleRoomResponse(orderRoom.Room),
+		Booking: ToSimpleBookingResponse(orderRoom.Booking),
+	}
+}
+
+func ToSimpleChatResponse(chat *model.Chat) *types.SimpleChatResponse {
+	if chat == nil {
+		return nil
+	}
+
+	return &types.SimpleChatResponse{
+		ID:          chat.ID,
+		OrderRoom:   ToSimpleOrderRoomResponse(chat.OrderRoom),
+		Department:  ToSimpleDepartmentResponse(chat.Department),
+		ExpiredAt:   chat.ExpiredAt,
+		LastMessage: ToSimpleMessageResponse(chat.Messages[0]),
+	}
+}
+
+func ToSimpleChatsResponse(chats []*model.Chat) []*types.SimpleChatResponse {
+	if len(chats) == 0 {
+		return make([]*types.SimpleChatResponse, 0)
+	}
+
+	chatsRes := make([]*types.SimpleChatResponse, 0, len(chats))
+	for _, chat := range chats {
+		chatsRes = append(chatsRes, ToSimpleChatResponse(chat))
+	}
+
+	return chatsRes
 }

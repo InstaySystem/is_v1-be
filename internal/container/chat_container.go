@@ -3,6 +3,7 @@ package container
 import (
 	"github.com/InstaySystem/is-be/internal/handler"
 	"github.com/InstaySystem/is-be/internal/repository"
+	"github.com/InstaySystem/is-be/internal/service"
 	svcImpl "github.com/InstaySystem/is-be/internal/service/implement"
 	"github.com/InstaySystem/is-be/pkg/snowflake"
 	"go.uber.org/zap"
@@ -11,6 +12,7 @@ import (
 
 type ChatContainer struct {
 	Hdl *handler.ChatHandler
+	Svc service.ChatService
 }
 
 func NewChatContainer(
@@ -23,5 +25,8 @@ func NewChatContainer(
 	svc := svcImpl.NewChatService(db, chatRepo, orderRepo, sfGen, logger)
 	hdl := handler.NewChatHandler(svc)
 
-	return &ChatContainer{hdl}
+	return &ChatContainer{
+		hdl,
+		svc,
+	}
 }

@@ -1,10 +1,12 @@
 package implement
 
 import (
+	"context"
 	"errors"
 
 	"github.com/InstaySystem/is-be/internal/model"
 	"github.com/InstaySystem/is-be/internal/repository"
+	"github.com/InstaySystem/is-be/internal/types"
 	"gorm.io/gorm"
 )
 
@@ -34,4 +36,32 @@ func (r *chatRepoImpl) FindChatByIDTx(tx *gorm.DB, chatID int64) (*model.Chat, e
 	}
 
 	return &chat, nil
+}
+
+func (r *chatRepoImpl) UpdateChatTx(tx *gorm.DB, chatID int64, updateData map[string]any) error {
+	return tx.Model(&model.Chat{}).Where("id = ?", chatID).Updates(updateData).Error
+}
+
+func (r *chatRepoImpl) FindAllChatsByDepartmentIDWithDetailsPaginated(ctx context.Context, query types.ChatPaginationQuery, staffID, departmentID int64) ([]*model.Chat, int64, error) {
+	var chats []*model.Chat
+	var total int64
+
+	db := r.db.WithContext(ctx).Where("department_id = ?", departmentID).Model(&model.Chat{})
+	if err := db.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (query.Page - 1) * query.Limit
+	if err := db.Order("last_message_at DESC").Limit(int(query.Limit)).Offset(int(offset)).Preload("OrderRoom.Room").Preload("OrderRoom.Booking").
+		Preload("Messages", func(db *gorm.DB) *gorm.DB {
+			return db.Raw(`
+				SELECT m.* FROM messages m
+				JOIN chats c ON m.chat_id = c.id
+				WHERE m.created_at = c.last_message_at
+			`)
+		}).Preload("Messages.Sender").Preload("Messages.StaffsRead", "staff_id = ?", staffID).Find(&chats).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return chats, total, nil
 }

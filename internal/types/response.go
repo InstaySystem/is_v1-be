@@ -256,25 +256,31 @@ type BasicOrderServiceResponse struct {
 }
 
 type OrderServiceResponse struct {
-	ID           int64                    `json:"id"`
-	Code         string                   `json:"code"`
-	Service      *BasicServiceResponse    `json:"service"`
-	OrderRoom    *SimpleOrderRoomResponse `json:"order_room"`
-	Quantity     uint32                   `json:"quantity"`
-	TotalPrice   float64                  `json:"total_price"`
-	Status       string                   `json:"status"`
-	CreatedAt    time.Time                `json:"created_at"`
-	UpdatedAt    time.Time                `json:"updated_at"`
-	GuestNote    *string                  `json:"guest_note"`
-	StaffNote    *string                  `json:"staff_note"`
-	CancelReason *string                  `json:"cancel_reason"`
-	RejectReason *string                  `json:"reject_reason"`
-	UpdatedBy    *BasicUserResponse       `json:"updated_by"`
+	ID           int64                   `json:"id"`
+	Code         string                  `json:"code"`
+	Service      *BasicServiceResponse   `json:"service"`
+	OrderRoom    *BasicOrderRoomResponse `json:"order_room"`
+	Quantity     uint32                  `json:"quantity"`
+	TotalPrice   float64                 `json:"total_price"`
+	Status       string                  `json:"status"`
+	CreatedAt    time.Time               `json:"created_at"`
+	UpdatedAt    time.Time               `json:"updated_at"`
+	GuestNote    *string                 `json:"guest_note"`
+	StaffNote    *string                 `json:"staff_note"`
+	CancelReason *string                 `json:"cancel_reason"`
+	RejectReason *string                 `json:"reject_reason"`
+	UpdatedBy    *BasicUserResponse      `json:"updated_by"`
+}
+
+type BasicOrderRoomResponse struct {
+	ID   int64               `json:"id"`
+	Room *SimpleRoomResponse `json:"room"`
 }
 
 type SimpleOrderRoomResponse struct {
-	ID   int64               `json:"id"`
-	Room *SimpleRoomResponse `json:"room"`
+	ID      int64                  `json:"id"`
+	Room    *SimpleRoomResponse    `json:"room"`
+	Booking *SimpleBookingResponse `json:"booking"`
 }
 
 type NotificationStaffResponse struct {
@@ -313,7 +319,7 @@ type RequestResponse struct {
 	ID          int64                      `json:"id"`
 	Code        string                     `json:"code"`
 	RequestType *SimpleRequestTypeResponse `json:"request_type"`
-	OrderRoom   *SimpleOrderRoomResponse   `json:"order_room"`
+	OrderRoom   *BasicOrderRoomResponse    `json:"order_room"`
 	Content     string                     `json:"content"`
 	Status      string                     `json:"status"`
 	CreatedAt   time.Time                  `json:"created_at"`
@@ -328,4 +334,29 @@ type BasicRequestResponse struct {
 	RoomName        string    `json:"room_name"`
 	Status          string    `json:"status"`
 	CreatedAt       time.Time `json:"created_at"`
+}
+
+type SimpleMessageResponse struct {
+	ID         int64                 `json:"id"`
+	Content    *string               `json:"content"`
+	ImageKey   *string               `json:"image_key"`
+	SenderType string                `json:"sender_type"`
+	Sender     *BasicUserResponse    `json:"sender_id"`
+	CreatedAt  time.Time             `json:"created_at"`
+	IsRead     bool                  `json:"is_read"`
+	ReadAt     *time.Time            `json:"read_at"`
+	StaffRead  *MessageStaffResponse `json:"staff_read"`
+}
+
+type MessageStaffResponse struct {
+	ID     int64     `json:"id"`
+	ReadAt time.Time `json:"read_at"`
+}
+
+type SimpleChatResponse struct {
+	ID          int64                     `json:"id"`
+	OrderRoom   *SimpleOrderRoomResponse  `json:"order_room"`
+	Department  *SimpleDepartmentResponse `json:"department"`
+	ExpiredAt   time.Time                 `json:"expired_at"`
+	LastMessage *SimpleMessageResponse    `json:"last_message"`
 }

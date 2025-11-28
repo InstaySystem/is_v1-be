@@ -72,6 +72,7 @@ func NewServer(cfg *config.Config) (*Server, error) {
 	listenWorker.Start()
 
 	go ctn.SSEHub.Run()
+	go ctn.WSHub.Run()
 
 	r := gin.Default()
 	if err = r.SetTrustedProxies([]string{"127.0.0.1"}); err != nil {
@@ -102,7 +103,9 @@ func NewServer(cfg *config.Config) (*Server, error) {
 	router.BookingRouter(api, ctn.BookingCtn.Hdl, ctn.AuthMid)
 	router.OrderRouter(api, ctn.OrderCtn.Hdl, ctn.AuthMid)
 	router.NotificationRouter(api, ctn.NotificationCtn.Hdl, ctn.AuthMid)
+	router.ChatRouter(api, ctn.ChatCtn.Hdl, ctn.AuthMid)
 	router.SSERouter(api, ctn.SSECtn.Hdl, ctn.AuthMid)
+	router.WSRouter(api, ctn.WSCtn.Hdl, ctn.AuthMid)
 
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

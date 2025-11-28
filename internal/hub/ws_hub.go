@@ -98,6 +98,7 @@ func (c *WSClient) ReadPump() {
 
 		var msg types.CreateMessageRequest
 		if err = json.Unmarshal(data, &msg); err != nil {
+			fmt.Printf("%v", err)
 			break
 		}
 
@@ -106,6 +107,7 @@ func (c *WSClient) ReadPump() {
 
 		message, err := c.Hub.ChatSvc.CreateMessage(ctx, c.ClientID, c.DepartmentID, c.Type, msg)
 		if err != nil {
+			fmt.Printf("%v", err)
 			break
 		}
 
@@ -149,7 +151,7 @@ func (c *WSClient) WritePump() {
 			w.Write(message)
 
 			n := len(c.Send)
-			for i := 0; i < n; i++ {
+			for range n {
 				w.Write(newline)
 				w.Write(<-c.Send)
 			}
