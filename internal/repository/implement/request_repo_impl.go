@@ -190,14 +190,14 @@ func applyRequestFilters(db *gorm.DB, query types.RequestPaginationQuery) *gorm.
 
 		if query.From != "" {
 			if parsedFrom, err := time.Parse(layout, query.From); err == nil {
-				db = db.Where("created_at >= ?", parsedFrom)
+				db = db.Where("request.created_at >= ?", parsedFrom)
 			}
 		}
 
 		if query.To != "" {
 			if parsedTo, err := time.Parse(layout, query.To); err == nil {
 				endOfDay := parsedTo.AddDate(0, 0, 1)
-				db = db.Where("created_at < ?", endOfDay)
+				db = db.Where("request.created_at < ?", endOfDay)
 			}
 		}
 	}
