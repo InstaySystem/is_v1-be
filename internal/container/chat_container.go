@@ -1,0 +1,27 @@
+package container
+
+import (
+	"github.com/InstaySystem/is-be/internal/handler"
+	"github.com/InstaySystem/is-be/internal/repository"
+	svcImpl "github.com/InstaySystem/is-be/internal/service/implement"
+	"github.com/InstaySystem/is-be/pkg/snowflake"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
+)
+
+type ChatContainer struct {
+	Hdl *handler.ChatHandler
+}
+
+func NewChatContainer(
+	db *gorm.DB,
+	chatRepo repository.ChatRepository,
+	orderRepo repository.OrderRepository,
+	sfGen snowflake.Generator,
+	logger *zap.Logger,
+) *ChatContainer {
+	svc := svcImpl.NewChatService(db, chatRepo, orderRepo, sfGen, logger)
+	hdl := handler.NewChatHandler(svc)
+
+	return &ChatContainer{hdl}
+}

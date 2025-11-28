@@ -31,6 +31,7 @@ type Container struct {
 	BookingCtn      *BookingContainer
 	OrderCtn        *OrderContainer
 	NotificationCtn *NotificationContainer
+	ChatCtn         *ChatContainer
 	SSECtn          *SSEContainer
 	AuthMid         *middleware.AuthMiddleware
 	ReqMid          *middleware.RequestMiddleware
@@ -67,6 +68,7 @@ func NewContainer(
 	bookingRepo := repoImpl.NewBookingRepository(db)
 	orderRepo := repoImpl.NewOrderRepository(db)
 	notificationRepo := repoImpl.NewNotificationRepository(db)
+	chatRepo := repoImpl.NewChatRepository(db)
 
 	fileCtn := NewFileContainer(cfg, s3, logger)
 	authCtn := NewAuthContainer(cfg, db, logger, bHash, jwtProvider, cacheProvider, mqProvider)
@@ -75,9 +77,10 @@ func NewContainer(
 	serviceCtn := NewServiceContainer(db, serviceRepo, sfGen, logger, mqProvider)
 	requestCtn := NewRequestContainer(db, requestRepo, orderRepo, notificationRepo, sfGen, logger, mqProvider)
 	roomCtn := NewRoomContainer(roomRepo, sfGen, logger)
-	bookingCtn := NewBookingContainer(db, logger)
+	bookingCtn := NewBookingContainer(bookingRepo, logger)
 	orderCtn := NewOrderContainer(db, orderRepo, bookingRepo, serviceRepo, notificationRepo, sfGen, logger, cacheProvider, jwtProvider, mqProvider, cfg.JWT.GuestName)
 	notificationCtn := NewNotificationContainer(notificationRepo, logger, sfGen)
+	chatCtn := NewChatContainer(db, chatRepo, orderRepo, sfGen, logger)
 	sseCtn := NewSSEContainer(sseHub)
 
 	authMid := middleware.NewAuthMiddleware(cfg.JWT.AccessName, cfg.JWT.RefreshName, cfg.JWT.GuestName, userRepo, jwtProvider, logger, cacheProvider)
@@ -94,6 +97,7 @@ func NewContainer(
 		bookingCtn,
 		orderCtn,
 		notificationCtn,
+		chatCtn,
 		sseCtn,
 		authMid,
 		reqMid,

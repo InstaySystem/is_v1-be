@@ -260,3 +260,10 @@ type RequestPaginationQuery struct {
 	Search string `form:"search" json:"search"`
 	Status string `form:"status" binding:"omitempty,oneof=accepted pending rejected canceled" json:"status"`
 }
+
+type CreateMessageRequest struct {
+	Content    *string `json:"content" binding:"omitempty"`
+	ImageKey   *string `json:"image_key" binding:"omitempty"`
+	ReceiverID *int64  `json:"receiver_id" binding:"omitempty"`
+	ChatID     *int64  `json:"chat_id" binding:"omitempty"`
+}

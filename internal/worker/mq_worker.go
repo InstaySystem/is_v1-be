@@ -108,10 +108,10 @@ func (w *MQWorker) startSendServiceNotification() {
 		}
 
 		event := types.SSEEventData{
-			Event:      "order_service",
-			Type:       serviceNotificationMsg.Receiver,
-			Department: serviceNotificationMsg.Department,
-			Data:       data,
+			Event:        "order_service",
+			Type:         serviceNotificationMsg.Receiver,
+			DepartmentID: serviceNotificationMsg.DepartmentID,
+			Data:         data,
 		}
 
 		for _, clientID := range serviceNotificationMsg.ReceiverIDs {

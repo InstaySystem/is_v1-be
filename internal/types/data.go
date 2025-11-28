@@ -39,12 +39,12 @@ type AuthEmailMessage struct {
 }
 
 type NotificationMessage struct {
-	Content     string  `json:"content"`
-	Type        string  `json:"type"`
-	ContentID   int64   `json:"content_id"`
-	Receiver    string  `json:"receiver"`
-	Department  *string `json:"department"`
-	ReceiverIDs []int64 `json:"receiver_ids"`
+	Content      string  `json:"content"`
+	Type         string  `json:"type"`
+	ContentID    int64   `json:"content_id"`
+	Receiver     string  `json:"receiver"`
+	DepartmentID *int64  `json:"department_id"`
+	ReceiverIDs  []int64 `json:"receiver_ids"`
 }
 
 type StaffCountResult struct {
@@ -68,8 +68,8 @@ type OrderRoomData struct {
 }
 
 type SSEEventData struct {
-	Event      string  `json:"event"`
-	Type       string  `json:"type"`
-	Department *string `json:"department,omitempty"`
-	Data       any     `json:"data,omitempty"`
+	Event        string `json:"event"`
+	Type         string `json:"type"`
+	DepartmentID *int64 `json:"department_id,omitempty"`
+	Data         any    `json:"data,omitempty"`
 }

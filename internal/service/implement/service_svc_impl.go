@@ -268,7 +268,7 @@ func (s *serviceSvcImpl) UpdateService(ctx context.Context, serviceID, userID in
 		return common.ErrServiceNotFound
 	}
 
-	if err = s.db.Transaction(func(tx *gorm.DB) error {
+	if err = s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		updateData := map[string]any{}
 
 		if req.Name != nil && *req.Name != service.Name {
@@ -290,7 +290,7 @@ func (s *serviceSvcImpl) UpdateService(ctx context.Context, serviceID, userID in
 
 		if len(updateData) > 0 {
 			updateData["updated_by_id"] = userID
-			if err = s.serviceRepo.UpdateServiceTx(ctx, tx, serviceID, updateData); err != nil {
+			if err = s.serviceRepo.UpdateServiceTx(tx, serviceID, updateData); err != nil {
 				if ok, _ := common.IsUniqueViolation(err); ok {
 					return common.ErrServiceAlreadyExists
 				}
@@ -303,7 +303,7 @@ func (s *serviceSvcImpl) UpdateService(ctx context.Context, serviceID, userID in
 		}
 
 		if len(req.DeleteImages) > 0 {
-			images, err := s.serviceRepo.FindAllServiceImagesByIDTx(ctx, tx, req.DeleteImages)
+			images, err := s.serviceRepo.FindAllServiceImagesByIDTx(tx, req.DeleteImages)
 			if err != nil {
 				s.logger.Error("find service images by id failed", zap.Error(err))
 				return err
@@ -312,7 +312,7 @@ func (s *serviceSvcImpl) UpdateService(ctx context.Context, serviceID, userID in
 				return common.ErrHasServiceImageNotFound
 			}
 
-			if err = s.serviceRepo.DeleteAllServiceImagesByIDTx(ctx, tx, req.DeleteImages); err != nil {
+			if err = s.serviceRepo.DeleteAllServiceImagesByIDTx(tx, req.DeleteImages); err != nil {
 				s.logger.Error("delete service images by id failed", zap.Error(err))
 				return err
 			}
@@ -341,7 +341,7 @@ func (s *serviceSvcImpl) UpdateService(ctx context.Context, serviceID, userID in
 				imgIDs = append(imgIDs, img.ID)
 			}
 
-			images, err := s.serviceRepo.FindAllServiceImagesByIDTx(ctx, tx, req.DeleteImages)
+			images, err := s.serviceRepo.FindAllServiceImagesByIDTx(tx, req.DeleteImages)
 			if err != nil {
 				s.logger.Error("find service images by id failed", zap.Error(err))
 				return err
@@ -363,7 +363,7 @@ func (s *serviceSvcImpl) UpdateService(ctx context.Context, serviceID, userID in
 				}
 
 				if len(updateData) > 0 {
-					if err := s.serviceRepo.UpdateServiceImageTx(ctx, tx, img.ID, updateData); err != nil {
+					if err := s.serviceRepo.UpdateServiceImageTx(tx, img.ID, updateData); err != nil {
 						s.logger.Error("update service image failed", zap.Int64("id", img.ID), zap.Error(err))
 						return err
 					}
@@ -390,7 +390,7 @@ func (s *serviceSvcImpl) UpdateService(ctx context.Context, serviceID, userID in
 				images = append(images, serviceImage)
 			}
 
-			if err = s.serviceRepo.CreateServiceImagesTx(ctx, tx, images); err != nil {
+			if err = s.serviceRepo.CreateServiceImagesTx(tx, images); err != nil {
 				s.logger.Error("create service images failed", zap.Error(err))
 				return err
 			}

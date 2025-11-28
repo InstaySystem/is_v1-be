@@ -181,7 +181,7 @@ func (s *requestSvcImpl) CreateRequest(ctx context.Context, orderRoomID int64, r
 		RequestTypeID: requestType.ID,
 	}
 
-	if err = s.db.Transaction(func(tx *gorm.DB) error {
+	if err = s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err = s.requestRepo.CreateRequest(ctx, request); err != nil {
 			s.logger.Error("create request failed", zap.Error(err))
 			return err
@@ -204,7 +204,7 @@ func (s *requestSvcImpl) CreateRequest(ctx context.Context, orderRoomID int64, r
 			ContentID:    request.ID,
 		}
 
-		if err = s.notificationRepo.CreateNotificationTx(ctx, tx, notification); err != nil {
+		if err = s.notificationRepo.CreateNotificationTx(tx, notification); err != nil {
 			s.logger.Error("create notification failed", zap.Error(err))
 			return err
 		}
@@ -215,12 +215,12 @@ func (s *requestSvcImpl) CreateRequest(ctx context.Context, orderRoomID int64, r
 		}
 
 		requestNotificationMsg := types.NotificationMessage{
-			Content:     notification.Content,
-			Type:        notification.Type,
-			ContentID:   notification.ContentID,
-			Receiver:    notification.Receiver,
-			Department:  &requestType.Department.Name,
-			ReceiverIDs: staffIDs,
+			Content:      notification.Content,
+			Type:         notification.Type,
+			ContentID:    notification.ContentID,
+			Receiver:     notification.Receiver,
+			DepartmentID: &requestType.DepartmentID,
+			ReceiverIDs:  staffIDs,
 		}
 
 		go func(msg types.NotificationMessage) {
@@ -248,8 +248,8 @@ func (s *requestSvcImpl) UpdateRequestForGuest(ctx context.Context, orderRoomID,
 		return common.ErrOrderRoomNotFound
 	}
 
-	if err = s.db.Transaction(func(tx *gorm.DB) error {
-		request, err := s.requestRepo.FindRequestByIDWithRequestTypeDetailsTx(ctx, tx, requestID)
+	if err = s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		request, err := s.requestRepo.FindRequestByIDWithRequestTypeDetailsTx(tx, requestID)
 		if err != nil {
 			if strings.Contains(err.Error(), "lock") {
 				return common.ErrLockedRecord
@@ -265,7 +265,7 @@ func (s *requestSvcImpl) UpdateRequestForGuest(ctx context.Context, orderRoomID,
 			return common.ErrInvalidStatus
 		}
 
-		if err = s.requestRepo.UpdateRequestTx(ctx, tx, requestID, map[string]any{"status": status}); err != nil {
+		if err = s.requestRepo.UpdateRequestTx(tx, requestID, map[string]any{"status": status}); err != nil {
 			s.logger.Error("update request failed", zap.Int64("id", requestID), zap.Error(err))
 			return err
 		}
@@ -287,7 +287,7 @@ func (s *requestSvcImpl) UpdateRequestForGuest(ctx context.Context, orderRoomID,
 			OrderRoomID:  orderRoomID,
 		}
 
-		if err = s.notificationRepo.CreateNotificationTx(ctx, tx, notification); err != nil {
+		if err = s.notificationRepo.CreateNotificationTx(tx, notification); err != nil {
 			s.logger.Error("create notification failed", zap.Error(err))
 			return err
 		}
@@ -298,12 +298,12 @@ func (s *requestSvcImpl) UpdateRequestForGuest(ctx context.Context, orderRoomID,
 		}
 
 		requestNotificationMsg := types.NotificationMessage{
-			Content:     notification.Content,
-			Type:        notification.Type,
-			ContentID:   notification.ContentID,
-			Receiver:    notification.Receiver,
-			Department:  &request.RequestType.Department.Name,
-			ReceiverIDs: staffIDs,
+			Content:      notification.Content,
+			Type:         notification.Type,
+			ContentID:    notification.ContentID,
+			Receiver:     notification.Receiver,
+			DepartmentID: &request.RequestType.DepartmentID,
+			ReceiverIDs:  staffIDs,
 		}
 
 		go func(msg types.NotificationMessage) {
@@ -385,8 +385,8 @@ func (s *requestSvcImpl) GetRequestByID(ctx context.Context, userID, requestID i
 }
 
 func (s *requestSvcImpl) UpdateRequestForAdmin(ctx context.Context, departmentID *int64, userID, requestID int64, status string) error {
-	if err := s.db.Transaction(func(tx *gorm.DB) error {
-		request, err := s.requestRepo.FindRequestByIDWithRequestTypeDetailsTx(ctx, tx, requestID)
+	if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		request, err := s.requestRepo.FindRequestByIDWithRequestTypeDetailsTx(tx, requestID)
 		if err != nil {
 			if strings.Contains(err.Error(), "lock") {
 				return common.ErrLockedRecord
@@ -410,7 +410,7 @@ func (s *requestSvcImpl) UpdateRequestForAdmin(ctx context.Context, departmentID
 			"status":        status,
 			"updated_by_id": userID,
 		}
-		if err = s.requestRepo.UpdateRequestTx(ctx, tx, requestID, updateData); err != nil {
+		if err = s.requestRepo.UpdateRequestTx(tx, requestID, updateData); err != nil {
 			s.logger.Error("update request failed", zap.Int64("id", requestID), zap.Error(err))
 			return err
 		}
@@ -437,7 +437,7 @@ func (s *requestSvcImpl) UpdateRequestForAdmin(ctx context.Context, departmentID
 			OrderRoomID:  request.OrderRoomID,
 		}
 
-		if err = s.notificationRepo.CreateNotificationTx(ctx, tx, notification); err != nil {
+		if err = s.notificationRepo.CreateNotificationTx(tx, notification); err != nil {
 			s.logger.Error("create notification failed", zap.Error(err))
 			return err
 		}

@@ -26,6 +26,9 @@ var allModels = []any{
 	&model.OrderService{},
 	&model.Notification{},
 	&model.NotificationStaff{},
+	&model.Chat{},
+	&model.Message{},
+	&model.MessageStaff{},
 }
 
 type DB struct {

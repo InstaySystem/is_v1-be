@@ -9,7 +9,7 @@ import (
 )
 
 type Notification interface {
-	CreateNotificationTx(ctx context.Context, tx *gorm.DB, notification *model.Notification) error
+	CreateNotificationTx(tx *gorm.DB, notification *model.Notification) error
 
 	FindAllUnreadNotificationsByContentIDAndType(ctx context.Context, staffID, contentID int64, contentType string) ([]*model.Notification, error)
 

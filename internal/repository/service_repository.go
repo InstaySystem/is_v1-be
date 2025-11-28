@@ -25,15 +25,15 @@ type ServiceRepository interface {
 
 	FindServiceByIDWithDetails(ctx context.Context, serviceID int64) (*model.Service, error)
 
-	FindAllServiceImagesByIDTx(ctx context.Context, tx *gorm.DB, ids []int64) ([]*model.ServiceImage, error)
+	FindAllServiceImagesByIDTx(tx *gorm.DB, ids []int64) ([]*model.ServiceImage, error)
 
-	DeleteAllServiceImagesByIDTx(ctx context.Context, tx *gorm.DB, ids []int64) error
+	DeleteAllServiceImagesByIDTx(tx *gorm.DB, ids []int64) error
 
-	UpdateServiceImageTx(ctx context.Context, tx *gorm.DB, serviceImageID int64, updateData map[string]any) error
+	UpdateServiceImageTx(tx *gorm.DB, serviceImageID int64, updateData map[string]any) error
 
-	CreateServiceImagesTx(ctx context.Context, tx *gorm.DB, serviceImages []*model.ServiceImage) error
+	CreateServiceImagesTx(tx *gorm.DB, serviceImages []*model.ServiceImage) error
 
-	UpdateServiceTx(ctx context.Context, tx *gorm.DB, serviceID int64, updateData map[string]any) error
+	UpdateServiceTx(tx *gorm.DB, serviceID int64, updateData map[string]any) error
 
 	FindAllServiceType(ctx context.Context) ([]*model.ServiceType, error)
 

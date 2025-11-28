@@ -299,12 +299,13 @@ func (m *AuthMiddleware) IsClient() gin.HandlerFunc {
 					})
 					return
 				}
+				
 				c.Set("client_id", user.ID)
 				c.Set("client_type", "staff")
 				if user.Department != nil {
-					c.Set("department", user.Department.Name)
+					c.Set("department_id", user.DepartmentID)
 				} else {
-					c.Set("department", nil)
+					c.Set("department_id", nil)
 				}
 				c.Next()
 				return
@@ -317,7 +318,7 @@ func (m *AuthMiddleware) IsClient() gin.HandlerFunc {
 			if err == nil {
 				c.Set("client_id", orderRoomID)
 				c.Set("client_type", "guest")
-				c.Set("department", nil)
+				c.Set("department_id", nil)
 				c.Next()
 				return
 			}

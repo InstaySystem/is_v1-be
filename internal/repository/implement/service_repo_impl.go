@@ -177,29 +177,29 @@ func (r *serviceRepoImpl) DeleteService(ctx context.Context, serviceID int64) er
 	return nil
 }
 
-func (r *serviceRepoImpl) FindAllServiceImagesByIDTx(ctx context.Context, tx *gorm.DB, ids []int64) ([]*model.ServiceImage, error) {
+func (r *serviceRepoImpl) FindAllServiceImagesByIDTx(tx *gorm.DB, ids []int64) ([]*model.ServiceImage, error) {
 	var images []*model.ServiceImage
-	if err := tx.WithContext(ctx).Where("id IN ?", ids).Find(&images).Error; err != nil {
+	if err := tx.Where("id IN ?", ids).Find(&images).Error; err != nil {
 		return nil, err
 	}
 
 	return images, nil
 }
 
-func (r *serviceRepoImpl) DeleteAllServiceImagesByIDTx(ctx context.Context, tx *gorm.DB, ids []int64) error {
-	return tx.WithContext(ctx).Where("id IN ?", ids).Delete(&model.ServiceImage{}).Error
+func (r *serviceRepoImpl) DeleteAllServiceImagesByIDTx(tx *gorm.DB, ids []int64) error {
+	return tx.Where("id IN ?", ids).Delete(&model.ServiceImage{}).Error
 }
 
-func (r *serviceRepoImpl) UpdateServiceImageTx(ctx context.Context, tx *gorm.DB, serviceImageID int64, updateData map[string]any) error {
-	return tx.WithContext(ctx).Model(&model.ServiceImage{}).Where("id = ?", serviceImageID).Updates(updateData).Error
+func (r *serviceRepoImpl) UpdateServiceImageTx(tx *gorm.DB, serviceImageID int64, updateData map[string]any) error {
+	return tx.Model(&model.ServiceImage{}).Where("id = ?", serviceImageID).Updates(updateData).Error
 }
 
-func (r *serviceRepoImpl) CreateServiceImagesTx(ctx context.Context, tx *gorm.DB, serviceImages []*model.ServiceImage) error {
-	return tx.WithContext(ctx).Create(serviceImages).Error
+func (r *serviceRepoImpl) CreateServiceImagesTx(tx *gorm.DB, serviceImages []*model.ServiceImage) error {
+	return tx.Create(serviceImages).Error
 }
 
-func (r *serviceRepoImpl) UpdateServiceTx(ctx context.Context, tx *gorm.DB, serviceID int64, updateData map[string]any) error {
-	return tx.WithContext(ctx).Model(&model.Service{}).Where("id = ?", serviceID).Updates(updateData).Error
+func (r *serviceRepoImpl) UpdateServiceTx(tx *gorm.DB, serviceID int64, updateData map[string]any) error {
+	return tx.Model(&model.Service{}).Where("id = ?", serviceID).Updates(updateData).Error
 }
 
 func (r *serviceRepoImpl) FindAllServicesWithServiceTypeAndThumbnailPaginated(ctx context.Context, query types.ServicePaginationQuery) ([]*model.Service, int64, error) {

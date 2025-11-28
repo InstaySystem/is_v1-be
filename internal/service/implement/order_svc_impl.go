@@ -192,8 +192,8 @@ func (s *orderSvcImpl) CreateOrderService(ctx context.Context, orderRoomID int64
 		GuestNote:   req.GuestNote,
 	}
 
-	if err = s.db.Transaction(func(tx *gorm.DB) error {
-		if err = s.orderRepo.CreateOrderServiceTx(ctx, tx, orderService); err != nil {
+	if err = s.db.WithContext(ctx).WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err = s.orderRepo.CreateOrderServiceTx(tx, orderService); err != nil {
 			s.logger.Error("create order service failed", zap.Error(err))
 			return err
 		}
@@ -215,7 +215,7 @@ func (s *orderSvcImpl) CreateOrderService(ctx context.Context, orderRoomID int64
 			ContentID:    orderService.ID,
 		}
 
-		if err = s.notificationRepo.CreateNotificationTx(ctx, tx, notification); err != nil {
+		if err = s.notificationRepo.CreateNotificationTx(tx, notification); err != nil {
 			s.logger.Error("create notification failed", zap.Error(err))
 			return err
 		}
@@ -226,12 +226,12 @@ func (s *orderSvcImpl) CreateOrderService(ctx context.Context, orderRoomID int64
 		}
 
 		serviceNotificationMsg := types.NotificationMessage{
-			Content:     notification.Content,
-			Type:        notification.Type,
-			ContentID:   notification.ContentID,
-			Receiver:    notification.Receiver,
-			Department:  &service.ServiceType.Department.Name,
-			ReceiverIDs: staffIDs,
+			Content:      notification.Content,
+			Type:         notification.Type,
+			ContentID:    notification.ContentID,
+			Receiver:     notification.Receiver,
+			DepartmentID: &service.ServiceType.DepartmentID,
+			ReceiverIDs:  staffIDs,
 		}
 
 		go func(msg types.NotificationMessage) {
@@ -303,8 +303,8 @@ func (s *orderSvcImpl) UpdateOrderServiceForGuest(ctx context.Context, orderRoom
 		return common.ErrOrderRoomNotFound
 	}
 
-	if err = s.db.Transaction(func(tx *gorm.DB) error {
-		orderService, err := s.orderRepo.FindOrderServiceByIDWithServiceDetailsTx(ctx, tx, orderServiceID)
+	if err = s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		orderService, err := s.orderRepo.FindOrderServiceByIDWithServiceDetailsTx(tx, orderServiceID)
 		if err != nil {
 			if strings.Contains(err.Error(), "lock") {
 				return common.ErrLockedRecord
@@ -324,7 +324,7 @@ func (s *orderSvcImpl) UpdateOrderServiceForGuest(ctx context.Context, orderRoom
 			"status":        req.Status,
 			"cancel_reason": *req.Reason,
 		}
-		if err = s.orderRepo.UpdateOrderServiceTx(ctx, tx, orderServiceID, updateData); err != nil {
+		if err = s.orderRepo.UpdateOrderServiceTx(tx, orderServiceID, updateData); err != nil {
 			s.logger.Error("update order service failed", zap.Int64("id", orderServiceID), zap.Error(err))
 			return err
 		}
@@ -346,7 +346,7 @@ func (s *orderSvcImpl) UpdateOrderServiceForGuest(ctx context.Context, orderRoom
 			OrderRoomID:  orderRoomID,
 		}
 
-		if err = s.notificationRepo.CreateNotificationTx(ctx, tx, notification); err != nil {
+		if err = s.notificationRepo.CreateNotificationTx(tx, notification); err != nil {
 			s.logger.Error("create notification failed", zap.Error(err))
 			return err
 		}
@@ -357,12 +357,12 @@ func (s *orderSvcImpl) UpdateOrderServiceForGuest(ctx context.Context, orderRoom
 		}
 
 		serviceNotificationMsg := types.NotificationMessage{
-			Content:     notification.Content,
-			Type:        notification.Type,
-			ContentID:   notification.ContentID,
-			Receiver:    notification.Receiver,
-			Department:  &orderService.Service.ServiceType.Department.Name,
-			ReceiverIDs: staffIDs,
+			Content:      notification.Content,
+			Type:         notification.Type,
+			ContentID:    notification.ContentID,
+			Receiver:     notification.Receiver,
+			DepartmentID: &orderService.Service.ServiceType.DepartmentID,
+			ReceiverIDs:  staffIDs,
 		}
 
 		go func(msg types.NotificationMessage) {
@@ -412,8 +412,8 @@ func (s *orderSvcImpl) GetOrderServicesForAdmin(ctx context.Context, query types
 }
 
 func (s *orderSvcImpl) UpdateOrderServiceForAdmin(ctx context.Context, departmentID *int64, userID, orderServiceID int64, req types.UpdateOrderServiceRequest) error {
-	if err := s.db.Transaction(func(tx *gorm.DB) error {
-		orderService, err := s.orderRepo.FindOrderServiceByIDWithServiceDetailsTx(ctx, tx, orderServiceID)
+	if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		orderService, err := s.orderRepo.FindOrderServiceByIDWithServiceDetailsTx(tx, orderServiceID)
 		if err != nil {
 			if strings.Contains(err.Error(), "lock") {
 				return common.ErrLockedRecord
@@ -445,7 +445,7 @@ func (s *orderSvcImpl) UpdateOrderServiceForAdmin(ctx context.Context, departmen
 			updateData["staff_note"] = *req.StaffNote
 		}
 
-		if err = s.orderRepo.UpdateOrderServiceTx(ctx, tx, orderServiceID, updateData); err != nil {
+		if err = s.orderRepo.UpdateOrderServiceTx(tx, orderServiceID, updateData); err != nil {
 			s.logger.Error("update order service failed", zap.Int64("id", orderServiceID), zap.Error(err))
 			return err
 		}
@@ -472,7 +472,7 @@ func (s *orderSvcImpl) UpdateOrderServiceForAdmin(ctx context.Context, departmen
 			OrderRoomID:  orderService.OrderRoomID,
 		}
 
-		if err = s.notificationRepo.CreateNotificationTx(ctx, tx, notification); err != nil {
+		if err = s.notificationRepo.CreateNotificationTx(tx, notification); err != nil {
 			s.logger.Error("create notification failed", zap.Error(err))
 			return err
 		}

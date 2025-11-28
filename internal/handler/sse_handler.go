@@ -11,7 +11,6 @@ import (
 	"github.com/InstaySystem/is-be/internal/types"
 	"github.com/gin-contrib/sse"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type SSEHandler struct {
@@ -22,7 +21,7 @@ func NewSSEHandler(hub *hub.SSEHub) *SSEHandler {
 	return &SSEHandler{hub}
 }
 
-func (h *SSEHandler) HandleSSE(c *gin.Context) {
+func (h *SSEHandler) ServeSSE(c *gin.Context) {
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")
 	c.Header("Connection", "keep-alive")
@@ -34,7 +33,7 @@ func (h *SSEHandler) HandleSSE(c *gin.Context) {
 
 	clientID := c.GetInt64("client_id")
 	clientType := c.GetString("client_type")
-	department := c.GetString("department")
+	departmentID := c.GetInt64("department_id")
 	if clientID == 0 && clientType == "" {
 		common.ToAPIResponse(c, http.StatusForbidden, common.ErrForbidden.Error(), nil)
 		return
@@ -46,21 +45,14 @@ func (h *SSEHandler) HandleSSE(c *gin.Context) {
 	})
 	c.Writer.Flush()
 
-	var departmentP *string
-	if department == "" {
-		departmentP = nil
+	var departmentIDP *int64
+	if departmentID == 0 {
+		departmentIDP = nil
 	} else {
-		departmentP = &department
+		departmentIDP = &departmentID
 	}
 
-	client := &hub.SSEClient{
-		ID:         uuid.NewString(),
-		ClientID:   clientID,
-		Type:       clientType,
-		Department: departmentP,
-		Chan:       make(chan []byte, 256),
-		Done:       make(chan bool),
-	}
+	client := hub.NewSSEClient(clientID, clientType, departmentIDP)
 
 	h.hub.Register <- client
 	defer func() {
@@ -74,7 +66,7 @@ func (h *SSEHandler) HandleSSE(c *gin.Context) {
 
 	for {
 		select {
-		case message := <-client.Chan:
+		case message := <-client.Send:
 			var msg types.SSEEventData
 			if err := json.Unmarshal(message, &msg); err != nil {
 				fmt.Printf("[SSE] Error unmarshaling message: %v\n", err)

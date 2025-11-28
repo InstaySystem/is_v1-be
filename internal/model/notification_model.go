@@ -22,7 +22,7 @@ type Notification struct {
 type NotificationStaff struct {
 	ID             int64     `gorm:"type:bigint;primaryKey" json:"id"`
 	NotificationID int64     `gorm:"type:bigint;not null" json:"notification_id"`
-	StaffID        int64     `gorm:"type:bigint;not null" json:"department_id"`
+	StaffID        int64     `gorm:"type:bigint;not null" json:"staff_id"`
 	ReadAt         time.Time `gorm:"autoCreateTime" json:"read_at"`
 
 	Notification *Notification `gorm:"foreignKey:NotificationID;references:ID;constraint:fk_notification_staffs_notification,OnUpdate:CASCADE,OnDelete:CASCADE" json:"notification"`

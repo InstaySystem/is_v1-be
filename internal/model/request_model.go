@@ -5,7 +5,7 @@ import "time"
 type RequestType struct {
 	ID           int64     `gorm:"type:bigint;primaryKey" json:"id"`
 	Name         string    `gorm:"type:varchar(150);not null" json:"name"`
-	Slug         string    `gorm:"type:varchar(150);uniqueIndex:request_types_slug_key;not null"`
+	Slug         string    `gorm:"type:varchar(150);uniqueIndex:request_types_slug_key;not null" json:"slug"`
 	CreatedAt    time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt    time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 	CreatedByID  int64     `gorm:"type:bigint;not null" json:"created_by_id"`

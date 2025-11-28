@@ -6,6 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SSERouter(rg *gin.RouterGroup, hdl *handler.SSEHandler, authMid *middleware.AuthMiddleware) {
-	rg.GET("/sse", authMid.IsClient(), hdl.ServeSSE)
+func WSRouter(rg *gin.RouterGroup, hdl *handler.WSHandler, authMid *middleware.AuthMiddleware) {
+	rg.GET("/ws", authMid.IsClient(), hdl.ServeWS)
 }

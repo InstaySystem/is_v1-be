@@ -6,15 +6,27 @@ import (
 	"sync"
 
 	"github.com/InstaySystem/is-be/internal/types"
+	"github.com/google/uuid"
 )
 
 type SSEClient struct {
-	ID         string
-	ClientID   int64
-	Type       string
-	Department *string
-	Chan       chan []byte
-	Done       chan bool
+	ID           string
+	ClientID     int64
+	Type         string
+	DepartmentID *int64
+	Send         chan []byte
+	Done         chan bool
+}
+
+func NewSSEClient(clientID int64, clientType string, departmentID *int64) *SSEClient {
+	return &SSEClient{
+		uuid.NewString(),
+		clientID,
+		clientType,
+		departmentID,
+		make(chan []byte, 256),
+		make(chan bool),
+	}
 }
 
 type SSEHub struct {
@@ -46,7 +58,7 @@ func (h *SSEHub) Run() {
 			h.Mutex.Lock()
 			if _, ok := h.Clients[client.ID]; ok {
 				delete(h.Clients, client.ID)
-				close(client.Chan)
+				close(client.Send)
 				close(client.Done)
 			}
 			h.Mutex.Unlock()
@@ -55,10 +67,10 @@ func (h *SSEHub) Run() {
 			h.Mutex.RLock()
 			for _, client := range h.Clients {
 				select {
-				case client.Chan <- message:
+				case client.Send <- message:
 				default:
 					delete(h.Clients, client.ID)
-					close(client.Chan)
+					close(client.Send)
 					close(client.Done)
 				}
 			}
@@ -68,11 +80,11 @@ func (h *SSEHub) Run() {
 }
 
 func (h *SSEHub) SendToClient(clientID int64, event types.SSEEventData) {
-	evtDept := "nil"
-	if event.Department != nil {
-		evtDept = *event.Department
+	evtDeptID := int64(0)
+	if event.DepartmentID != nil {
+		evtDeptID = *event.DepartmentID
 	}
-	fmt.Printf("\n[SSE-DEBUG] ---> Start SendToClient. TargetID: %d | EventType: %s | EventDept: %s\n", clientID, event.Type, evtDept)
+	fmt.Printf("\n[SSE-DEBUG] ---> Start SendToClient. TargetID: %d | EventType: %s | EventDeptID: %d\n", clientID, event.Type, evtDeptID)
 
 	h.Mutex.RLock()
 
@@ -80,25 +92,25 @@ func (h *SSEHub) SendToClient(clientID int64, event types.SSEEventData) {
 
 	data, _ := json.Marshal(event)
 
-	if event.Type == "staff" && event.Department != nil {
+	if event.Type == "staff" && event.DepartmentID != nil {
 		for _, client := range h.Clients {
-			clientDept := "nil"
-			if client.Department != nil {
-				clientDept = *client.Department
+			clientDeptID := int64(0)
+			if client.DepartmentID != nil {
+				clientDeptID = *client.DepartmentID
 			}
 
 			if client.ClientID == clientID {
-				fmt.Printf("[SSE-DEBUG] Found matching ClientID in Hub. HubClient: {Type: %s, Dept: %s} vs Event: {Type: %s, Dept: %s}\n",
-					client.Type, clientDept, event.Type, evtDept)
+				fmt.Printf("[SSE-DEBUG] Found matching ClientID in Hub. HubClient: {Type: %s, DeptID: %d} vs Event: {Type: %s, DeptID: %d}\n",
+					client.Type, clientDeptID, event.Type, evtDeptID)
 
-				isDeptMatch := client.Department != nil && *client.Department == *event.Department
-				fmt.Printf("[SSE-DEBUG] Condition Check: Dept != nil? %v | Values Match? %v\n", client.Department != nil, isDeptMatch)
+				isDeptMatch := client.DepartmentID != nil && *client.DepartmentID == *event.DepartmentID
+				fmt.Printf("[SSE-DEBUG] Condition Check: Dept != nil? %v | Values Match? %v\n", client.DepartmentID != nil, isDeptMatch)
 			}
 
-			if client.ClientID == clientID && client.Department != nil && *client.Department == *event.Department {
+			if client.ClientID == clientID && client.DepartmentID != nil && *client.DepartmentID == *event.DepartmentID {
 				fmt.Println("[SSE-DEBUG] >>> MATCHED! Attempting to send to channel...")
 				select {
-				case client.Chan <- data:
+				case client.Send <- data:
 					fmt.Println("[SSE-DEBUG] >>> SUCCESS: Sent data to client channel.")
 				default:
 					fmt.Println("[SSE-DEBUG] >>> FAILED: Channel full/blocked. Removing client.")
@@ -106,7 +118,7 @@ func (h *SSEHub) SendToClient(clientID int64, event types.SSEEventData) {
 					h.Mutex.Lock()
 					if _, ok := h.Clients[client.ID]; ok {
 						delete(h.Clients, client.ID)
-						close(client.Chan)
+						close(client.Send)
 						close(client.Done)
 					}
 					h.Mutex.Unlock()
@@ -114,17 +126,17 @@ func (h *SSEHub) SendToClient(clientID int64, event types.SSEEventData) {
 				}
 			}
 		}
-	} else if event.Type == "guest" && event.Department == nil {
+	} else if event.Type == "guest" && event.DepartmentID == nil {
 		fmt.Println("[SSE-DEBUG] Processing logic for GUEST")
 		for _, client := range h.Clients {
 			if client.ClientID == clientID {
 				fmt.Printf("[SSE-DEBUG] Found guest client. Type: %s vs EventType: %s\n", client.Type, event.Type)
 			}
 
-			if client.ClientID == clientID && client.Department == nil && client.Type == event.Type {
+			if client.ClientID == clientID && client.DepartmentID == nil && client.Type == event.Type {
 				fmt.Println("[SSE-DEBUG] >>> MATCHED GUEST! Attempting to send...")
 				select {
-				case client.Chan <- data:
+				case client.Send <- data:
 					fmt.Println("[SSE-DEBUG] >>> SUCCESS: Sent data to guest.")
 				default:
 					fmt.Println("[SSE-DEBUG] >>> FAILED: Guest channel blocked.")
@@ -132,7 +144,7 @@ func (h *SSEHub) SendToClient(clientID int64, event types.SSEEventData) {
 					h.Mutex.Lock()
 					if _, ok := h.Clients[client.ID]; ok {
 						delete(h.Clients, client.ID)
-						close(client.Chan)
+						close(client.Send)
 						close(client.Done)
 					}
 					h.Mutex.Unlock()

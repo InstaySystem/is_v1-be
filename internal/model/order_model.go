@@ -18,6 +18,7 @@ type OrderRoom struct {
 	OrderServices []*OrderService `gorm:"foreignKey:OrderRoomID;references:ID;constraint:fk_order_services_order_room,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"order_services"`
 	Requests      []*Request      `gorm:"foreignKey:OrderRoomID;references:ID;constraint:fk_requests_order_room,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"requests"`
 	Notifications []*Notification `gorm:"foreignKey:OrderRoomID;references:ID;constraint:fk_notifications_order_room,OnUpdate:CASCADE,OnDelete:CASCADE" json:"notifications"`
+	Chats         []*Chat         `gorm:"foreignKey:OrderRoomID;references:ID;constraint:fk_chats_order_room,OnUpdate:CASCADE,OnDelete:CASCADE" json:"chats"`
 }
 
 type OrderService struct {

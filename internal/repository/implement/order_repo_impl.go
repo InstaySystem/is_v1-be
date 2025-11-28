@@ -26,13 +26,25 @@ func (r *orderRepoImpl) CreateOrderRoom(ctx context.Context, orderRoom *model.Or
 	return r.db.WithContext(ctx).Create(orderRoom).Error
 }
 
-func (r *orderRepoImpl) CreateOrderServiceTx(ctx context.Context, tx *gorm.DB, orderService *model.OrderService) error {
-	return tx.WithContext(ctx).Create(orderService).Error
+func (r *orderRepoImpl) CreateOrderServiceTx(tx *gorm.DB, orderService *model.OrderService) error {
+	return tx.Create(orderService).Error
 }
 
 func (r *orderRepoImpl) FindOrderRoomByIDWithRoom(ctx context.Context, orderRoomID int64) (*model.OrderRoom, error) {
 	var orderRoom model.OrderRoom
 	if err := r.db.WithContext(ctx).Preload("Room").Where("id = ?", orderRoomID).First(&orderRoom).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &orderRoom, nil
+}
+
+func (r *orderRepoImpl) FindOrderRoomByIDWithBookingTx(tx *gorm.DB, orderRoomID int64) (*model.OrderRoom, error) {
+	var orderRoom model.OrderRoom
+	if err := tx.Preload("Booking").Where("id = ?", orderRoomID).First(&orderRoom).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -54,9 +66,9 @@ func (r *orderRepoImpl) FindOrderRoomByIDWithDetails(ctx context.Context, orderR
 	return &orderRoom, nil
 }
 
-func (r *orderRepoImpl) FindOrderServiceByIDWithServiceDetailsTx(ctx context.Context, tx *gorm.DB, orderServiceID int64) (*model.OrderService, error) {
+func (r *orderRepoImpl) FindOrderServiceByIDWithServiceDetailsTx(tx *gorm.DB, orderServiceID int64) (*model.OrderService, error) {
 	var orderService model.OrderService
-	if err := tx.WithContext(ctx).Clauses(clause.Locking{
+	if err := tx.Clauses(clause.Locking{
 		Strength: clause.LockingStrengthUpdate,
 		Options:  clause.LockingOptionsNoWait,
 	}).Preload("Service.ServiceType.Department.Staffs").Where("id = ?", orderServiceID).First(&orderService).Error; err != nil {
@@ -69,8 +81,8 @@ func (r *orderRepoImpl) FindOrderServiceByIDWithServiceDetailsTx(ctx context.Con
 	return &orderService, nil
 }
 
-func (r *orderRepoImpl) UpdateOrderServiceTx(ctx context.Context, tx *gorm.DB, orderServiceID int64, updateData map[string]any) error {
-	return tx.WithContext(ctx).Model(&model.OrderService{}).Where("id = ?", orderServiceID).Updates(updateData).Error
+func (r *orderRepoImpl) UpdateOrderServiceTx(tx *gorm.DB, orderServiceID int64, updateData map[string]any) error {
+	return tx.Model(&model.OrderService{}).Where("id = ?", orderServiceID).Updates(updateData).Error
 }
 
 func (r *orderRepoImpl) FindOrderServiceByIDWithDetails(ctx context.Context, orderServiceID int64) (*model.OrderService, error) {

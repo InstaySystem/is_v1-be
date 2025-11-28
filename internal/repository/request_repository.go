@@ -27,9 +27,9 @@ type RequestRepository interface {
 
 	FindRequestByCodeWithRequestType(ctx context.Context, requestCode string) (*model.Request, error)
 
-	FindRequestByIDWithRequestTypeDetailsTx(ctx context.Context, tx *gorm.DB, requestID int64) (*model.Request, error)
+	FindRequestByIDWithRequestTypeDetailsTx(tx *gorm.DB, requestID int64) (*model.Request, error)
 
-	UpdateRequestTx(ctx context.Context, tx *gorm.DB, requestID int64, updateData map[string]any) error
+	UpdateRequestTx(tx *gorm.DB, requestID int64, updateData map[string]any) error
 
 	FindAllRequestsByOrderRoomIDWithDetails(ctx context.Context, orderRoomID int64) ([]*model.Request, error)
 

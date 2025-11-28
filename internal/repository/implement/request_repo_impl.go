@@ -110,9 +110,9 @@ func (r *requestRepoImpl) FindRequestByCodeWithRequestType(ctx context.Context, 
 	return &request, nil
 }
 
-func (r *requestRepoImpl) FindRequestByIDWithRequestTypeDetailsTx(ctx context.Context, tx *gorm.DB, requestID int64) (*model.Request, error) {
+func (r *requestRepoImpl) FindRequestByIDWithRequestTypeDetailsTx(tx *gorm.DB, requestID int64) (*model.Request, error) {
 	var request model.Request
-	if err := tx.WithContext(ctx).Preload("RequestType.Department.Staffs").Where("id = ?", requestID).First(&request).Error; err != nil {
+	if err := tx.Preload("RequestType.Department.Staffs").Where("id = ?", requestID).First(&request).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -122,8 +122,8 @@ func (r *requestRepoImpl) FindRequestByIDWithRequestTypeDetailsTx(ctx context.Co
 	return &request, nil
 }
 
-func (r *requestRepoImpl) UpdateRequestTx(ctx context.Context, tx *gorm.DB, requestID int64, updateData map[string]any) error {
-	return tx.WithContext(ctx).Model(&model.Request{}).Where("id = ?", requestID).Updates(updateData).Error
+func (r *requestRepoImpl) UpdateRequestTx(tx *gorm.DB, requestID int64, updateData map[string]any) error {
+	return tx.Model(&model.Request{}).Where("id = ?", requestID).Updates(updateData).Error
 }
 
 func (r *requestRepoImpl) FindAllRequestsByOrderRoomIDWithDetails(ctx context.Context, orderRoomID int64) ([]*model.Request, error) {

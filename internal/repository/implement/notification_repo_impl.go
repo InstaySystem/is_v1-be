@@ -17,8 +17,8 @@ func NewNotificationRepository(db *gorm.DB) repository.Notification {
 	return &notificationRepoImpl{db}
 }
 
-func (r *notificationRepoImpl) CreateNotificationTx(ctx context.Context, tx *gorm.DB, notification *model.Notification) error {
-	return tx.WithContext(ctx).Create(notification).Error
+func (r *notificationRepoImpl) CreateNotificationTx(tx *gorm.DB, notification *model.Notification) error {
+	return tx.Create(notification).Error
 }
 
 func (r *notificationRepoImpl) CreateNotificationStaffs(ctx context.Context, notificationStaffs []*model.NotificationStaff) error {
