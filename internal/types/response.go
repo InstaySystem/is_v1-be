@@ -401,3 +401,15 @@ type BasicNotificationResponse struct {
 	ReadAt    *time.Time `json:"read_at"`
 	CreatedAt time.Time  `json:"created_at"`
 }
+
+type WSResponse struct {
+	Event string `json:"event"`
+	Data  any    `json:"data"`
+}
+
+type UpdateReadMessagesResponse struct {
+	ChatID     int64     `json:"chat_id"`
+	ReaderID   int64     `json:"reader_id"`
+	ReaderType string    `json:"reader_type"`
+	ReadAt     time.Time `json:"read_at"`
+}

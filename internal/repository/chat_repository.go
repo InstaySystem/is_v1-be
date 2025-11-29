@@ -27,7 +27,7 @@ type ChatRepository interface {
 
 	UpdateMessagesByChatIDAndSenderTypeTx(tx *gorm.DB, chatID int64, senderType string, updateData map[string]any) error
 
-	FindChatByIDWithDetailsTx(tx *gorm.DB, chatID, staffID int64) (*model.Chat, error)
+	FindChatByCodeWithDetails(ctx context.Context, chatCode string) (*model.Chat, error)
 
-	FindChatByCodeWithDetailsTx(tx *gorm.DB, chatCode string) (*model.Chat, error)
+	FindChatByIDWithDetails(ctx context.Context, chatID, staffID int64) (*model.Chat, error)
 }

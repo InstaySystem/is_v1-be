@@ -91,8 +91,6 @@ func (h *ChatHandler) GetChatByID(c *gin.Context) {
 		switch err {
 		case common.ErrChatNotFound:
 			common.ToAPIResponse(c, http.StatusNotFound, err.Error(), nil)
-		case common.ErrForbidden:
-			common.ToAPIResponse(c, http.StatusForbidden, err.Error(), nil)
 		default:
 			common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
 		}
@@ -142,8 +140,6 @@ func (h *ChatHandler) GetChatByCode(c *gin.Context) {
 		switch err {
 		case common.ErrChatNotFound:
 			common.ToAPIResponse(c, http.StatusNotFound, err.Error(), nil)
-		case common.ErrForbidden:
-			common.ToAPIResponse(c, http.StatusForbidden, err.Error(), nil)
 		default:
 			common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
 		}

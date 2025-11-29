@@ -92,6 +92,77 @@ func (s *chatSvcImpl) CreateMessage(ctx context.Context, clientID int64, departm
 	return message, nil
 }
 
+func (s *chatSvcImpl) UpdateReadMessages(ctx context.Context, chatID, clientID int64, readerType string) (*model.Chat, error) {
+	var chat *model.Chat
+	var err error
+	if err = s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		now := time.Now()
+
+		if readerType == "staff" {
+			unreadIDs, err := s.chatRepo.FindAllUnreadMessageIDsByChatIDAndSenderTypeTx(tx, chatID, clientID, "guest")
+			if err != nil {
+				return err
+			}
+
+			if len(unreadIDs) > 0 {
+				newRecords := make([]*model.MessageStaff, 0, len(unreadIDs))
+				for _, msgID := range unreadIDs {
+					id, err := s.sfGen.NextID()
+					if err != nil {
+						return err
+					}
+
+					newRecords = append(newRecords, &model.MessageStaff{
+						ID:        id,
+						MessageID: msgID,
+						StaffID:   clientID,
+						ReadAt:    now,
+					})
+				}
+				if err := s.chatRepo.CreateMessageStaffsTx(tx, newRecords); err != nil {
+					s.logger.Error("create message staffs failed", zap.Error(err))
+					return err
+				}
+			}
+
+			updateData := map[string]any{
+				"is_read": true,
+				"read_at": now,
+			}
+
+			if err := s.chatRepo.UpdateMessagesByChatIDAndSenderTypeTx(tx, chatID, "guest", updateData); err != nil {
+				s.logger.Error("update messages by chat id failed", zap.Error(err))
+				return err
+			}
+		}
+		if readerType == "guest" {
+			updateData := map[string]any{
+				"is_read": true,
+				"read_at": now,
+			}
+			if err := s.chatRepo.UpdateMessagesByChatIDAndSenderTypeTx(tx, chatID, "staff", updateData); err != nil {
+				s.logger.Error("update messages by chat id failed", zap.Error(err))
+				return err
+			}
+		}
+
+		chat, err = s.chatRepo.FindChatByIDTx(tx, chatID)
+		if err != nil {
+			s.logger.Error("find chat by id failed", zap.Error(err))
+			return err
+		}
+		if chat == nil {
+			return common.ErrChatNotFound
+		}
+
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return chat, nil
+}
+
 func (s *chatSvcImpl) GetChatsForAdmin(ctx context.Context, query types.ChatPaginationQuery, userID, departmentID int64) ([]*model.Chat, *types.MetaResponse, error) {
 	if query.Page == 0 {
 		query.Page = 1
@@ -134,111 +205,35 @@ func (s *chatSvcImpl) GetChatsForGuest(ctx context.Context, orderRoomID int64) (
 }
 
 func (s *chatSvcImpl) GetChatByID(ctx context.Context, chatID, userID, departmentID int64) (*model.Chat, error) {
-	var chat *model.Chat
-	if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		now := time.Now()
-
-		unreadMessageIDs, err := s.chatRepo.FindAllUnreadMessageIDsByChatIDAndSenderTypeTx(tx, chatID, userID, "guest")
-		if err != nil {
-			s.logger.Error("find all unread message ids failed", zap.Error(err))
-			return err
-		}
-
-		if len(unreadMessageIDs) > 0 {
-			messageStaffs := make([]*model.MessageStaff, 0, len(unreadMessageIDs))
-			for _, msgID := range unreadMessageIDs {
-				id, err := s.sfGen.NextID()
-				if err != nil {
-					s.logger.Error("generate message staff id failed", zap.Error(err))
-					return err
-				}
-
-				messageStaffs = append(messageStaffs, &model.MessageStaff{
-					ID:        id,
-					MessageID: msgID,
-					StaffID:   userID,
-					ReadAt:    now,
-				})
-			}
-
-			if err := s.chatRepo.CreateMessageStaffsTx(tx, messageStaffs); err != nil {
-				s.logger.Error("create message staffs failed", zap.Error(err))
-				return err
-			}
-		}
-
-		updateData := map[string]any{
-			"is_read": true,
-			"read_at": time.Now(),
-		}
-		if err := s.chatRepo.UpdateMessagesByChatIDAndSenderTypeTx(tx, chatID, "guest", updateData); err != nil {
-			s.logger.Error("update messages by chat id failed", zap.Error(err))
-			return err
-		}
-
-		result, err := s.chatRepo.FindChatByIDWithDetailsTx(tx, chatID, userID)
-		if err != nil {
-			s.logger.Error("find chat by id failed", zap.Error(err))
-			return err
-		}
-
-		if result == nil {
-			return common.ErrChatNotFound
-		}
-
-		if result.DepartmentID != departmentID {
-			return common.ErrForbidden
-		}
-
-		chat = result
-
-		return nil
-	}); err != nil {
+	chat, err := s.chatRepo.FindChatByIDWithDetails(ctx, chatID, userID)
+	if err != nil {
+		s.logger.Error("find chat by id failed", zap.Error(err))
 		return nil, err
+	}
+
+	if chat == nil {
+		return nil, common.ErrChatNotFound
+	}
+
+	if chat.DepartmentID != departmentID {
+		return nil, common.ErrChatNotFound
 	}
 
 	return chat, nil
 }
 
 func (s *chatSvcImpl) GetChatByCode(ctx context.Context, chatCode string, orderRoomID int64) (*model.Chat, error) {
-	var chat *model.Chat
-	if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		result, err := s.chatRepo.FindChatByCodeWithDetailsTx(tx, chatCode)
-		if err != nil {
-			s.logger.Error("find chat by code failed", zap.Error(err))
-			return err
-		}
-
-		if result == nil {
-			return common.ErrChatNotFound
-		}
-
-		if result.OrderRoomID != orderRoomID {
-			return common.ErrForbidden
-		}
-
-		now := time.Now()
-		updateData := map[string]any{
-			"is_read": true,
-			"read_at": now,
-		}
-		if err := s.chatRepo.UpdateMessagesByChatIDAndSenderTypeTx(tx, result.ID, "staff", updateData); err != nil {
-			s.logger.Error("update messages by chat id failed", zap.Error(err))
-			return err
-		}
-
-		for _, msg := range result.Messages {
-			if msg.SenderType == "staff" && !msg.IsRead {
-				msg.IsRead = true
-				msg.ReadAt = &now
-			}
-		}
-
-		chat = result
-
-		return nil
-	}); err != nil {
+	chat, err := s.chatRepo.FindChatByCodeWithDetails(ctx, chatCode)
+	if err != nil {
+		s.logger.Error("find chat by code failed", zap.Error(err))
 		return nil, err
+	}
+	if chat == nil {
+		return nil, common.ErrChatNotFound
+	}
+
+	if chat.OrderRoomID != orderRoomID {
+		return nil, common.ErrChatNotFound
 	}
 
 	return chat, nil

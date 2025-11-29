@@ -1,5 +1,7 @@
 package types
 
+import "encoding/json"
+
 type UploadPresignedURLRequest struct {
 	FileName    string `json:"file_name" binding:"required"`
 	ContentType string `json:"content_type" binding:"required"`
@@ -271,4 +273,13 @@ type CreateMessageRequest struct {
 	ImageKey   *string `json:"image_key" binding:"omitempty"`
 	ReceiverID *int64  `json:"receiver_id" binding:"omitempty"`
 	ChatID     *int64  `json:"chat_id" binding:"omitempty"`
+}
+
+type WSRequest struct {
+	Event string          `json:"event"`
+	Data  json.RawMessage `json:"data"`
+}
+
+type UpdateReadMessagesRequest struct {
+	ChatID int64 `json:"chat_id"`
 }

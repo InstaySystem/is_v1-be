@@ -19,7 +19,13 @@ const (
 
 	pingPeriod = (pongWait * 9) / 10
 
-	maxMessageSize = 512
+	maxMessageSize = 2048
+
+	eventMarkRead = "mark_read"
+
+	eventNewMessage = "new_message"
+
+	eventError = "error"
 )
 
 var (
@@ -90,42 +96,113 @@ func (c *WSClient) ReadPump() {
 	for {
 		_, data, err := c.Conn.ReadMessage()
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				fmt.Printf("%v", err)
-			}
 			break
 		}
 
-		var msg types.CreateMessageRequest
-		if err = json.Unmarshal(data, &msg); err != nil {
-			fmt.Printf("%v", err)
-			break
+		var req types.WSRequest
+		if err := json.Unmarshal(data, &req); err != nil {
+			c.sendError("invalid message")
+			continue
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		message, err := c.Hub.ChatSvc.CreateMessage(ctx, c.ClientID, c.DepartmentID, c.Type, msg)
-		if err != nil {
-			fmt.Printf("%v", err)
-			break
+		switch req.Event {
+		case "send_message":
+			c.handleSendMessage(req.Data)
+		case "mark_read":
+			c.handleMarkRead(req.Data)
+		default:
+			c.sendError("unknown action")
 		}
-
-		messageBytes, _ := json.Marshal(message)
-
-		var targetKey string
-		if c.Type == "guest" {
-			targetKey = fmt.Sprintf("dept_%d", message.Chat.DepartmentID)
-		} else {
-			targetKey = fmt.Sprintf("guest_%d", message.Chat.OrderRoomID)
-		}
-
-		targetPayload := &MessagePayload{
-			TargetKey: targetKey,
-			Data:      messageBytes,
-		}
-		c.Hub.SendMessage <- targetPayload
 	}
+}
+
+func (c *WSClient) handleSendMessage(content []byte) {
+	var req types.CreateMessageRequest
+	if err := json.Unmarshal(content, &req); err != nil {
+		c.sendError("invalid message")
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	message, err := c.Hub.ChatSvc.CreateMessage(ctx, c.ClientID, c.DepartmentID, c.Type, req)
+	if err != nil {
+		c.sendError("send message failed")
+		return
+	}
+
+	res := types.WSResponse{
+		Event: eventNewMessage,
+		Data:  message,
+	}
+
+	resBytes, _ := json.Marshal(res)
+
+	targets := []string{
+		fmt.Sprintf("dept_%d", message.Chat.DepartmentID),
+		fmt.Sprintf("guest_%d", message.Chat.OrderRoomID),
+	}
+
+	for _, t := range targets {
+		msgPayload := &MessagePayload{
+			TargetKey: t,
+			Data:      resBytes,
+		}
+
+		c.Hub.SendMessage <- msgPayload
+	}
+}
+
+func (c *WSClient) handleMarkRead(content []byte) {
+	var req types.UpdateReadMessagesRequest
+	if err := json.Unmarshal(content, &req); err != nil {
+		c.sendError("invalid message")
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	chat, err := c.Hub.ChatSvc.UpdateReadMessages(ctx, req.ChatID, c.ClientID, c.Type)
+	if err != nil {
+		c.sendError("read message failed")
+		return
+	}
+
+	res := types.WSResponse{
+		Event: eventMarkRead,
+		Data: types.UpdateReadMessagesResponse{
+			ChatID:     req.ChatID,
+			ReaderID:   c.ClientID,
+			ReaderType: c.Type,
+			ReadAt:     chat.LastMessageAt,
+		},
+	}
+
+	resBytes, _ := json.Marshal(res)
+	targets := []string{
+		fmt.Sprintf("dept_%d", chat.DepartmentID),
+		fmt.Sprintf("guest_%d", chat.OrderRoomID),
+	}
+
+	for _, t := range targets {
+		msgPayload := &MessagePayload{
+			TargetKey: t,
+			Data:      resBytes,
+		}
+
+		c.Hub.SendMessage <- msgPayload
+	}
+}
+
+func (c *WSClient) sendError(msg string) {
+	resp := types.WSResponse{
+		Event: eventError,
+		Data:  map[string]string{"message": msg},
+	}
+	b, _ := json.Marshal(resp)
+	c.Send <- b
 }
 
 func (c *WSClient) WritePump() {

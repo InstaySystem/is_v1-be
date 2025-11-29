@@ -87,10 +87,10 @@ func (r *chatRepoImpl) FindAllChatsByDepartmentIDWithDetailsPaginated(ctx contex
 	return chats, total, nil
 }
 
-func (r *chatRepoImpl) FindChatByIDWithDetailsTx(tx *gorm.DB, chatID, staffID int64) (*model.Chat, error) {
+func (r *chatRepoImpl) FindChatByIDWithDetails(ctx context.Context, chatID, staffID int64) (*model.Chat, error) {
 	var chat model.Chat
 
-	if err := tx.
+	if err := r.db.WithContext(ctx).
 		Preload("OrderRoom.Room").
 		Preload("OrderRoom.Booking").
 		Preload("Messages", func(db *gorm.DB) *gorm.DB {
@@ -107,9 +107,9 @@ func (r *chatRepoImpl) FindChatByIDWithDetailsTx(tx *gorm.DB, chatID, staffID in
 	return &chat, nil
 }
 
-func (r *chatRepoImpl) FindChatByCodeWithDetailsTx(tx *gorm.DB, chatCode string) (*model.Chat, error) {
+func (r *chatRepoImpl) FindChatByCodeWithDetails(ctx context.Context, chatCode string) (*model.Chat, error) {
 	var chat model.Chat
-	if err := tx.Preload("Department").Preload("Messages", func(db *gorm.DB) *gorm.DB {
+	if err := r.db.WithContext(ctx).Preload("Department").Preload("Messages", func(db *gorm.DB) *gorm.DB {
 		return db.Order("created_at ASC")
 	}).Where("code = ?", chatCode).First(&chat).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

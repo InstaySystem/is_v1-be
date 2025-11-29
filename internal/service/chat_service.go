@@ -17,4 +17,6 @@ type ChatService interface {
 	GetChatByID(ctx context.Context, chatID, userID, departmentID int64) (*model.Chat, error)
 
 	GetChatByCode(ctx context.Context, chatCode string, orderRoomID int64) (*model.Chat, error)
+
+	UpdateReadMessages(ctx context.Context, chatID, clientID int64, readerType string) (*model.Chat, error)
 }
