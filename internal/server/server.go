@@ -75,17 +75,15 @@ func NewServer(cfg *config.Config) (*Server, error) {
 	go ctn.WSHub.Run()
 
 	r := gin.Default()
-	if err = r.SetTrustedProxies([]string{"127.0.0.1"}); err != nil {
-		return nil, fmt.Errorf("setup Proxy failed: %w", err)
-	}
+	_ = r.SetTrustedProxies(nil)
 
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
+		AllowOrigins:     cfg.Server.AllowOrigins,
+		AllowMethods:     cfg.Server.AllowMethods,
+		AllowHeaders:     cfg.Server.AllowHeaders,
+		ExposeHeaders:    cfg.Server.ExposeHeaders,
+		AllowCredentials: cfg.Server.AllowCredentials,
+		MaxAge:           cfg.Server.MaxAge,
 	}
 
 	r.Use(cors.New(corsConfig))
