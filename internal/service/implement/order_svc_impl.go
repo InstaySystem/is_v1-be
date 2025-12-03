@@ -61,7 +61,7 @@ func NewOrderService(
 }
 
 func (s *orderSvcImpl) CreateOrderRoom(ctx context.Context, userID int64, req types.CreateOrderRoomRequest) (int64, string, error) {
-	booking, err := s.bookingRepo.FindByID(ctx, req.BookingID)
+	booking, err := s.bookingRepo.FindBookingByID(ctx, req.BookingID)
 	if err != nil {
 		s.logger.Error("find booking by id failed", zap.Int64("id", req.BookingID), zap.Error(err))
 		return 0, "", err

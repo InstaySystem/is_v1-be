@@ -58,6 +58,7 @@ type SimpleBookingResponse struct {
 	BookedOn      time.Time `json:"booked_on"`
 	CheckIn       time.Time `json:"check_in"`
 	CheckOut      time.Time `json:"check_out"`
+	Source        string    `json:"source"`
 }
 
 type BasicUserResponse struct {
@@ -202,6 +203,11 @@ type BookingResponse struct {
 	BookingConditions  string    `json:"booking_conditions"`
 }
 
+type SourceResponse struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
 type FloorResponse struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`
@@ -216,7 +222,7 @@ type SimpleRoomResponse struct {
 	ID       int64                   `json:"id"`
 	Name     string                  `json:"name"`
 	RoomType *SimpleRoomTypeResponse `json:"room_type"`
-	Floor    *FloorResponse          `json:"floor"`
+	Floor    string                  `json:"floor"`
 }
 
 type RoomResponse struct {
@@ -227,7 +233,7 @@ type RoomResponse struct {
 	CreatedBy *BasicUserResponse      `json:"created_by"`
 	UpdatedBy *BasicUserResponse      `json:"updated_by"`
 	RoomType  *SimpleRoomTypeResponse `json:"room_type"`
-	Floor     *FloorResponse          `json:"floor"`
+	Floor     string                  `json:"floor"`
 }
 
 type SimpleOrderServiceResponse struct {
@@ -244,13 +250,13 @@ type SimpleOrderServiceResponse struct {
 }
 
 type BasicOrderServiceResponse struct {
-	ID          int64     `json:"id"`
-	ServiceName string    `json:"service_name"`
-	RoomName    string    `json:"room_name"`
-	Quantity    uint32    `json:"quantity"`
-	TotalPrice  float64   `json:"total_price"`
-	Status      string    `json:"status"`
-	CreatedAt   time.Time `json:"created_at"`
+	ID         int64     `json:"id"`
+	Service    string    `json:"service"`
+	Room       string    `json:"room"`
+	Quantity   uint32    `json:"quantity"`
+	TotalPrice float64   `json:"total_price"`
+	Status     string    `json:"status"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 type OrderServiceResponse struct {
@@ -323,11 +329,11 @@ type RequestResponse struct {
 }
 
 type BasicRequestResponse struct {
-	ID              int64     `json:"id"`
-	RequestTypeName string    `json:"request_type_name"`
-	RoomName        string    `json:"room_name"`
-	Status          string    `json:"status"`
-	CreatedAt       time.Time `json:"created_at"`
+	ID          int64     `json:"id"`
+	RequestType string    `json:"request_type"`
+	Room        string    `json:"room"`
+	Status      string    `json:"status"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 type SimpleMessageResponse struct {

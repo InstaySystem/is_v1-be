@@ -21,13 +21,13 @@ func NewBookingRepository(db *gorm.DB) repository.BookingRepository {
 	return &bookingRepoImpl{db}
 }
 
-func (r *bookingRepoImpl) Create(ctx context.Context, booking *model.Booking) error {
+func (r *bookingRepoImpl) CreateBooking(ctx context.Context, booking *model.Booking) error {
 	return r.db.WithContext(ctx).Create(booking).Error
 }
 
-func (r *bookingRepoImpl) FindByID(ctx context.Context, id int64) (*model.Booking, error) {
+func (r *bookingRepoImpl) FindBookingByIDWithSource(ctx context.Context, bookingID int64) (*model.Booking, error) {
 	var booking model.Booking
-	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&booking).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Source").Where("id = ?", bookingID).First(&booking).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -37,11 +37,48 @@ func (r *bookingRepoImpl) FindByID(ctx context.Context, id int64) (*model.Bookin
 	return &booking, nil
 }
 
-func (r *bookingRepoImpl) FindAllPaginated(ctx context.Context, query types.BookingPaginationQuery) ([]*model.Booking, int64, error) {
+func (r *bookingRepoImpl) FindBookingByID(ctx context.Context, bookingID int64) (*model.Booking, error) {
+	var booking model.Booking
+	if err := r.db.WithContext(ctx).Where("id = ?", bookingID).First(&booking).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &booking, nil
+}
+
+func (r *bookingRepoImpl) FindSourceByName(ctx context.Context, sourceName string) (*model.Source, error) {
+	var source model.Source
+	if err := r.db.WithContext(ctx).Where("name = ?", sourceName).First(&source).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &source, nil
+}
+
+func (r *bookingRepoImpl) CreateSource(ctx context.Context, source *model.Source) error {
+	return r.db.WithContext(ctx).Create(source).Error
+}
+
+func (r *bookingRepoImpl) FindAllSources(ctx context.Context) ([]*model.Source, error) {
+	var sources []*model.Source
+	if err := r.db.WithContext(ctx).Find(&sources).Error; err != nil {
+		return nil, err
+	}
+
+	return sources, nil
+}
+
+func (r *bookingRepoImpl) FindAllBookingsWithSourcePaginated(ctx context.Context, query types.BookingPaginationQuery) ([]*model.Booking, int64, error) {
 	var bookings []*model.Booking
 	var total int64
 
-	db := r.db.WithContext(ctx).Model(&model.Booking{})
+	db := r.db.WithContext(ctx).Preload("Source").Model(&model.Booking{})
 	db = applyBookingFilters(db, query)
 
 	if err := db.Count(&total).Error; err != nil {
@@ -64,6 +101,10 @@ func applyBookingFilters(db *gorm.DB, query types.BookingPaginationQuery) *gorm.
 			"LOWER(booking_number) LIKE @q OR LOWER(guest_full_name) LIKE @q OR LOWER(guest_phone) LIKE @q",
 			sql.Named("q", searchTerm),
 		)
+	}
+
+	if query.SourceID != 0 {
+		db = db.Where("source_id = ?", query.SourceID)
 	}
 
 	if query.From != "" || query.To != "" {

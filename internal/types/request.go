@@ -204,14 +204,15 @@ type UpdateRoomRequest struct {
 }
 
 type BookingPaginationQuery struct {
-	Page   uint32 `form:"page" binding:"omitempty,min=1" json:"page"`
-	Limit  uint32 `form:"limit" binding:"omitempty,min=1,max=100" json:"limit"`
-	Sort   string `form:"sort" json:"sort"`
-	Order  string `form:"order" binding:"omitempty,oneof=asc desc" json:"order"`
-	Filter string `form:"filter" binding:"omitempty" json:"filter"`
-	From   string `form:"from"   binding:"omitempty,datetime=2006-01-02" json:"from"`
-	To     string `form:"to"     binding:"omitempty,datetime=2006-01-02" json:"to"`
-	Search string `form:"search" json:"search"`
+	Page     uint32 `form:"page" binding:"omitempty,min=1" json:"page"`
+	Limit    uint32 `form:"limit" binding:"omitempty,min=1,max=100" json:"limit"`
+	Sort     string `form:"sort" json:"sort"`
+	Order    string `form:"order" binding:"omitempty,oneof=asc desc" json:"order"`
+	Filter   string `form:"filter" binding:"omitempty" json:"filter"`
+	From     string `form:"from"   binding:"omitempty,datetime=2006-01-02" json:"from"`
+	To       string `form:"to"     binding:"omitempty,datetime=2006-01-02" json:"to"`
+	Search   string `form:"search" json:"search"`
+	SourceID int64  `form:"source_id" binding:"omitempty" json:"source_id"`
 }
 
 type CreateOrderRoomRequest struct {

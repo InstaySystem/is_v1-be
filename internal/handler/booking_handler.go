@@ -39,7 +39,7 @@ func (h *BookingHandler) GetBookings(c *gin.Context) {
 
 	common.ToAPIResponse(c, http.StatusOK, "Get booking list successfully", gin.H{
 		"bookings": common.ToSimpleBookingsResponse(bookings),
-		"meta": meta,
+		"meta":     meta,
 	})
 }
 
@@ -66,5 +66,20 @@ func (h *BookingHandler) GetBookingByID(c *gin.Context) {
 
 	common.ToAPIResponse(c, http.StatusOK, "Get booking information successfully", gin.H{
 		"booking": common.ToBookingResponse(booking),
+	})
+}
+
+func (h *BookingHandler) GetSources(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	sources, err := h.bookingSvc.GetSources(ctx)
+	if err != nil {
+		common.ToAPIResponse(c, http.StatusInternalServerError, "internal server error", nil)
+		return
+	}
+
+	common.ToAPIResponse(c, http.StatusOK, "Get source list successfully", gin.H{
+		"sources": common.ToSourcesResponse(sources),
 	})
 }

@@ -8,9 +8,17 @@ import (
 )
 
 type BookingRepository interface {
-	Create(ctx context.Context, booking *model.Booking) error
+	CreateBooking(ctx context.Context, booking *model.Booking) error
 
-	FindAllPaginated(ctx context.Context, query types.BookingPaginationQuery) ([]*model.Booking, int64, error)
+	FindAllBookingsWithSourcePaginated(ctx context.Context, query types.BookingPaginationQuery) ([]*model.Booking, int64, error)
 
-	FindByID(ctx context.Context, id int64) (*model.Booking, error)
+	FindBookingByIDWithSource(ctx context.Context, bookingID int64) (*model.Booking, error)
+
+	FindBookingByID(ctx context.Context, bookingID int64) (*model.Booking, error)
+
+	FindSourceByName(ctx context.Context, sourceName string) (*model.Source, error)
+
+	CreateSource(ctx context.Context, source *model.Source) error
+
+	FindAllSources(ctx context.Context) ([]*model.Source, error)
 }

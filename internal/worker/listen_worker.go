@@ -255,7 +255,7 @@ func (w *ListenWorker) processEmail(msg *imap.Message, section *imap.BodySection
 		return
 	}
 
-	if err := w.bookingRepo.Create(w.ctx, bookingData); err != nil {
+	if err := w.bookingRepo.CreateBooking(w.ctx, bookingData); err != nil {
 		w.logger.Error("create booking failed", zap.Error(err))
 	} else {
 		w.logger.Info("booking created successfully",
@@ -346,7 +346,31 @@ func (w *ListenWorker) parseBookingFromHTML(htmlContent string) (*model.Booking,
 
 	if val := findValueByLabel("Booking source:"); val != nil {
 		if v := clean(val.Text()); v != "" {
-			booking.Source = v
+			var sourceID int64
+			source, err := w.bookingRepo.FindSourceByName(w.ctx, v)
+			if err != nil {
+				w.logger.Error("find source by name failed", zap.String("name", v), zap.Error(err))
+				return nil, err
+			}
+			if source != nil {
+				sourceID = source.ID
+			} else {
+				sourceID, err = w.sfGen.NextID()
+				if err != nil {
+					w.logger.Error("generate source id failed", zap.Error(err))
+					return nil, err
+				}
+
+				source := &model.Source{
+					ID:   sourceID,
+					Name: v,
+				}
+				if err = w.bookingRepo.CreateSource(w.ctx, source); err != nil {
+					w.logger.Error("create source failed", zap.Error(err))
+					return nil, err
+				}
+			}
+			booking.SourceID = sourceID
 		}
 	}
 

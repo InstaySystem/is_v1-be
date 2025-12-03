@@ -12,5 +12,7 @@ func BookingRouter(rg *gin.RouterGroup, hdl *handler.BookingHandler, authMid *mi
 		admin.GET("/bookings", hdl.GetBookings)
 
 		admin.GET("/bookings/:id", hdl.GetBookingByID)
+
+		admin.GET("/sources", hdl.GetSources)
 	}
 }

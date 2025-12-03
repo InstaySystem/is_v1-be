@@ -57,7 +57,7 @@ func ToRoomResponse(room *model.Room) *types.RoomResponse {
 		CreatedBy: ToBasicUserResponse(room.CreatedBy),
 		UpdatedBy: ToBasicUserResponse(room.UpdatedBy),
 		RoomType:  ToSimpleRoomTypeResponse(room.RoomType),
-		Floor:     ToFloorResponse(room.Floor),
+		Floor:     room.Floor.Name,
 	}
 }
 
@@ -443,6 +443,7 @@ func ToSimpleBookingResponse(booking *model.Booking) *types.SimpleBookingRespons
 		BookedOn:      booking.BookedOn,
 		CheckIn:       booking.CheckIn,
 		CheckOut:      booking.CheckOut,
+		Source:        booking.Source.Name,
 	}
 }
 
@@ -457,6 +458,30 @@ func ToSimpleBookingsResponse(bookings []*model.Booking) []*types.SimpleBookingR
 	}
 
 	return bookingsRes
+}
+
+func ToSourceResponse(source *model.Source) *types.SourceResponse {
+	if source == nil {
+		return nil
+	}
+
+	return &types.SourceResponse{
+		ID:   source.ID,
+		Name: source.Name,
+	}
+}
+
+func ToSourcesResponse(sources []*model.Source) []*types.SourceResponse {
+	if len(sources) == 0 {
+		return make([]*types.SourceResponse, 0)
+	}
+
+	sourcesRes := make([]*types.SourceResponse, 0, len(sources))
+	for _, source := range sources {
+		sourcesRes = append(sourcesRes, ToSourceResponse(source))
+	}
+
+	return sourcesRes
 }
 
 func ToBookingResponse(booking *model.Booking) *types.BookingResponse {
@@ -476,7 +501,7 @@ func ToBookingResponse(booking *model.Booking) *types.BookingResponse {
 		RoomNumber:         booking.RoomNumber,
 		GuestNumber:        booking.GuestNumber,
 		BookedOn:           booking.BookedOn,
-		Source:             booking.Source,
+		Source:             booking.Source.Name,
 		TotalNetPrice:      booking.TotalNetPrice,
 		TotalSellPrice:     booking.TotalSellPrice,
 		PromotionName:      booking.PromotionName,
@@ -506,7 +531,7 @@ func ToSimpleRoomResponse(room *model.Room) *types.SimpleRoomResponse {
 		ID:       room.ID,
 		Name:     room.Name,
 		RoomType: ToSimpleRoomTypeResponse(room.RoomType),
-		Floor:    ToFloorResponse(room.Floor),
+		Floor:    room.Floor.Name,
 	}
 }
 
@@ -563,13 +588,13 @@ func ToBasicOrderServiceResponse(orderService *model.OrderService) *types.BasicO
 	}
 
 	return &types.BasicOrderServiceResponse{
-		ID:          orderService.ID,
-		ServiceName: orderService.Service.Name,
-		RoomName:    orderService.OrderRoom.Room.Name,
-		Quantity:    orderService.Quantity,
-		TotalPrice:  orderService.TotalPrice,
-		Status:      orderService.Status,
-		CreatedAt:   orderService.CreatedAt,
+		ID:         orderService.ID,
+		Service:    orderService.Service.Name,
+		Room:       orderService.OrderRoom.Room.Name,
+		Quantity:   orderService.Quantity,
+		TotalPrice: orderService.TotalPrice,
+		Status:     orderService.Status,
+		CreatedAt:  orderService.CreatedAt,
 	}
 }
 
@@ -817,11 +842,11 @@ func ToBasicRequestResponse(request *model.Request) *types.BasicRequestResponse 
 	}
 
 	return &types.BasicRequestResponse{
-		ID:              request.ID,
-		RequestTypeName: request.RequestType.Name,
-		RoomName:        request.OrderRoom.Room.Name,
-		Status:          request.Status,
-		CreatedAt:       request.CreatedAt,
+		ID:          request.ID,
+		RequestType: request.RequestType.Name,
+		Room:        request.OrderRoom.Room.Name,
+		Status:      request.Status,
+		CreatedAt:   request.CreatedAt,
 	}
 }
 

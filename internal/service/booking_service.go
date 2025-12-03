@@ -11,4 +11,6 @@ type BookingService interface {
 	GetBookings(ctx context.Context, query types.BookingPaginationQuery) ([]*model.Booking, *types.MetaResponse, error)
 
 	GetBookingByID(ctx context.Context, id int64) (*model.Booking, error)
+
+	GetSources(ctx context.Context) ([]*model.Source, error)
 }

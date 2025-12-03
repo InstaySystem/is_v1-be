@@ -19,7 +19,7 @@ type RoomType struct {
 
 type Floor struct {
 	ID   int64  `gorm:"type:bigint;primaryKey" json:"id"`
-	Name string `gorm:"type:varchar(50);not null;uniqueIndex:floor_name_key" json:"name"`
+	Name string `gorm:"type:varchar(50);not null;uniqueIndex:floors_name_key" json:"name"`
 
 	Rooms []*Room `gorm:"foreignKey:FloorID;references:ID;constraint:fk_rooms_floor,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"rooms"`
 }

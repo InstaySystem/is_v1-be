@@ -34,7 +34,7 @@ func (s *bookingSvcImpl) GetBookings(ctx context.Context, query types.BookingPag
 		query.Limit = 10
 	}
 
-	bookings, total, err := s.bookingRepo.FindAllPaginated(ctx, query)
+	bookings, total, err := s.bookingRepo.FindAllBookingsWithSourcePaginated(ctx, query)
 	if err != nil {
 		s.logger.Error("find all bookings paginated failed", zap.Error(err))
 		return nil, nil, err
@@ -58,7 +58,7 @@ func (s *bookingSvcImpl) GetBookings(ctx context.Context, query types.BookingPag
 }
 
 func (s *bookingSvcImpl) GetBookingByID(ctx context.Context, id int64) (*model.Booking, error) {
-	booking, err := s.bookingRepo.FindByID(ctx, id)
+	booking, err := s.bookingRepo.FindBookingByIDWithSource(ctx, id)
 	if err != nil {
 		s.logger.Error("find booking by id failed", zap.Int64("id", id), zap.Error(err))
 		return nil, err
@@ -68,4 +68,14 @@ func (s *bookingSvcImpl) GetBookingByID(ctx context.Context, id int64) (*model.B
 	}
 
 	return booking, nil
+}
+
+func (s *bookingSvcImpl) GetSources(ctx context.Context) ([]*model.Source, error) {
+	source, err := s.bookingRepo.FindAllSources(ctx)
+	if err != nil {
+		s.logger.Error("find all sources failed", zap.Error(err))
+		return nil, err
+	}
+
+	return source, nil
 }

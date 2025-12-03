@@ -21,6 +21,7 @@ var allModels = []any{
 	&model.RoomType{},
 	&model.Floor{},
 	&model.Room{},
+	&model.Source{},
 	&model.Booking{},
 	&model.OrderRoom{},
 	&model.OrderService{},
