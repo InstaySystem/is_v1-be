@@ -56,7 +56,7 @@ func (r *orderRepoImpl) FindOrderRoomByIDWithBookingTx(tx *gorm.DB, orderRoomID 
 
 func (r *orderRepoImpl) FindOrderRoomByIDWithDetails(ctx context.Context, orderRoomID int64) (*model.OrderRoom, error) {
 	var orderRoom model.OrderRoom
-	if err := r.db.WithContext(ctx).Preload("Room").Preload("Room.RoomType").Preload("Room.Floor").Preload("Booking").Preload("CreatedBy").Preload("UpdatedBy").Where("id = ?", orderRoomID).First(&orderRoom).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Room.RoomType").Preload("Room.Floor").Preload("Booking.Source").Preload("CreatedBy").Preload("UpdatedBy").Where("id = ?", orderRoomID).First(&orderRoom).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
