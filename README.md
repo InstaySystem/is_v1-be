@@ -20,6 +20,7 @@ docker run -d -p 8080:8080 --name instay instay-be
 │   └── 📁 api
 │       └── 🐹 main.go
 ├── 📁 configs
+│   └── ⚙️ example.yaml
 │   └── ⚙️ main.yaml
 ├── 📁 docs
 │   ├── 🐹 docs.go
@@ -176,6 +177,7 @@ docker run -d -p 8080:8080 --name instay instay-be
 │   │   └── 🐹 bcrypt.go
 │   └── 📁 snowflake
 │       └── 🐹 snowflake.go
+├── ⚙️ .dockerignore
 ├── ⚙️ .gitignore
 ├── 🐳 Dockerfile
 ├── 📄 Makefile

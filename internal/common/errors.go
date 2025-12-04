@@ -75,8 +75,6 @@ var (
 
 	ErrBookingExpired = errors.New("booking expired")
 
-	ErrOrderRoomDuplicate = errors.New("order room duplicate")
-
 	ErrOrderServiceNotFound = errors.New("order service not found")
 
 	ErrChatNotFound = errors.New("chat not found")
@@ -86,4 +84,6 @@ var (
 	ErrOrderRoomReviewed = errors.New("order room reviewed")
 
 	ErrReviewNotFound = errors.New("review not found")
+
+	ErrRoomCurrentlyOccupied = errors.New("room currently occupied")
 )

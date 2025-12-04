@@ -35,9 +35,9 @@ type Room struct {
 	RoomTypeID  int64     `gorm:"type:bigint;not null" json:"room_type_id"`
 	FloorID     int64     `gorm:"type:bigint;not null" json:"floor_id"`
 
-	RoomType    *RoomType     `gorm:"foreignKey:RoomTypeID;references:ID;constraint:fk_rooms_room_type,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"room_type"`
-	Floor       *Floor        `gorm:"foreignKey:FloorID;references:ID;constraint:fk_rooms_floor,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"floor"`
-	CreatedBy   *User         `gorm:"foreignKey:CreatedByID;references:ID;constraint:fk_room_types_created_by,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"created_by"`
-	UpdatedBy   *User         `gorm:"foreignKey:UpdatedByID;references:ID;constraint:fk_room_types_updated_by,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"updated_by"`
+	RoomType   *RoomType    `gorm:"foreignKey:RoomTypeID;references:ID;constraint:fk_rooms_room_type,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"room_type"`
+	Floor      *Floor       `gorm:"foreignKey:FloorID;references:ID;constraint:fk_rooms_floor,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"floor"`
+	CreatedBy  *User        `gorm:"foreignKey:CreatedByID;references:ID;constraint:fk_room_types_created_by,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"created_by"`
+	UpdatedBy  *User        `gorm:"foreignKey:UpdatedByID;references:ID;constraint:fk_room_types_updated_by,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"updated_by"`
 	OrderRooms []*OrderRoom `gorm:"foreignKey:RoomID;references:ID;constraint:fk_order_rooms_room,OnUpdate:CASCADE,OnDelete:RESTRICT" json:"order_rooms"`
 }

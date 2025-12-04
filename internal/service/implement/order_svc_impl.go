@@ -25,6 +25,7 @@ type orderSvcImpl struct {
 	db               *gorm.DB
 	orderRepo        repository.OrderRepository
 	bookingRepo      repository.BookingRepository
+	roomRepo         repository.RoomRepository
 	serviceRepo      repository.ServiceRepository
 	notificationRepo repository.Notification
 	sfGen            snowflake.Generator
@@ -38,6 +39,7 @@ func NewOrderService(
 	db *gorm.DB,
 	orderRepo repository.OrderRepository,
 	bookingRepo repository.BookingRepository,
+	roomRepo repository.RoomRepository,
 	serviceRepo repository.ServiceRepository,
 	notificationRepo repository.Notification,
 	sfGen snowflake.Generator,
@@ -50,6 +52,7 @@ func NewOrderService(
 		db,
 		orderRepo,
 		bookingRepo,
+		roomRepo,
 		serviceRepo,
 		notificationRepo,
 		sfGen,
@@ -66,9 +69,25 @@ func (s *orderSvcImpl) CreateOrderRoom(ctx context.Context, userID int64, req ty
 		s.logger.Error("find booking by id failed", zap.Int64("id", req.BookingID), zap.Error(err))
 		return 0, "", err
 	}
+	if booking == nil {
+		return 0, "", common.ErrBookingNotFound
+	}
 
 	if booking.CheckOut.Before(time.Now()) {
 		return 0, "", common.ErrBookingExpired
+	}
+
+	room, err := s.roomRepo.FindRoomByIDWithActiveOrderRooms(ctx, req.RoomID)
+	if err != nil {
+		s.logger.Error("find room by id failed", zap.Int64("id", req.RoomID), zap.Error(err))
+		return 0, "", err
+	}
+	if room == nil {
+		return 0, "", common.ErrRoomNotFound
+	}
+	
+	if len(room.OrderRooms) > 0 {
+		return 0, "", common.ErrRoomCurrentlyOccupied
 	}
 
 	id, err := s.sfGen.NextID()
@@ -86,12 +105,6 @@ func (s *orderSvcImpl) CreateOrderRoom(ctx context.Context, userID int64, req ty
 	}
 
 	if err = s.orderRepo.CreateOrderRoom(ctx, orderRoom); err != nil {
-		if common.IsForeignKeyViolation(err) {
-			return 0, "", common.ErrRoomNotFound
-		}
-		if ok, _ := common.IsUniqueViolation(err); ok {
-			return 0, "", common.ErrOrderRoomDuplicate
-		}
 		s.logger.Error("create order room failed", zap.Error(err))
 		return 0, "", err
 	}

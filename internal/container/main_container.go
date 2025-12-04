@@ -82,7 +82,7 @@ func NewContainer(
 	requestCtn := NewRequestContainer(db, requestRepo, orderRepo, notificationRepo, sfGen, logger, mqProvider)
 	roomCtn := NewRoomContainer(roomRepo, sfGen, logger)
 	bookingCtn := NewBookingContainer(bookingRepo, logger)
-	orderCtn := NewOrderContainer(db, orderRepo, bookingRepo, serviceRepo, notificationRepo, sfGen, logger, cacheProvider, jwtProvider, mqProvider, cfg.JWT.GuestName)
+	orderCtn := NewOrderContainer(db, orderRepo, bookingRepo, roomRepo, serviceRepo, notificationRepo, sfGen, logger, cacheProvider, jwtProvider, mqProvider, cfg.JWT.GuestName)
 	notificationCtn := NewNotificationContainer(db, notificationRepo, logger, sfGen)
 	chatCtn := NewChatContainer(db, chatRepo, orderRepo, sfGen, logger)
 	reviewCtn := NewReviewContainer(reviewRepo, sfGen, logger)

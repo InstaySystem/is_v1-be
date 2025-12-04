@@ -20,6 +20,7 @@ func NewOrderContainer(
 	db *gorm.DB,
 	orderRepo repository.OrderRepository,
 	bookingRepo repository.BookingRepository,
+	roomRepo repository.RoomRepository,
 	serviceRepo repository.ServiceRepository,
 	notificationRepo repository.Notification,
 	sfGen snowflake.Generator,
@@ -29,7 +30,7 @@ func NewOrderContainer(
 	mqProvider mq.MessageQueueProvider,
 	guestName string,
 ) *OrderContainer {
-	svc := svcImpl.NewOrderService(db, orderRepo, bookingRepo, serviceRepo, notificationRepo, sfGen, logger, cacheProvider, jwtProvider, mqProvider)
+	svc := svcImpl.NewOrderService(db, orderRepo, bookingRepo, roomRepo, serviceRepo, notificationRepo, sfGen, logger, cacheProvider, jwtProvider, mqProvider)
 	hdl := handler.NewOrderHandler(svc, guestName)
 
 	return &OrderContainer{hdl}

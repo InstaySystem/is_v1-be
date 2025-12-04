@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/InstaySystem/is-be/internal/common"
 	"github.com/InstaySystem/is-be/internal/model"
@@ -80,6 +81,23 @@ func (r *roomRepoImpl) CountRoomByRoomTypeID(ctx context.Context, roomTypeIDs []
 
 func (r *roomRepoImpl) CreateRoom(ctx context.Context, room *model.Room) error {
 	return r.db.WithContext(ctx).Create(room).Error
+}
+
+func (r *roomRepoImpl) FindRoomByIDWithActiveOrderRooms(ctx context.Context, roomID int64) (*model.Room, error) {
+	var room model.Room
+	now := time.Now()
+
+	if err := r.db.WithContext(ctx).
+		Preload("OrderRooms", "booking.check_in <= ? AND booking.check_out >= ?", now, now).
+		Preload("OrderRooms.Booking").
+		Where("id = ?", roomID).First(&room).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &room, nil
 }
 
 func (r *roomRepoImpl) FindFloorByName(ctx context.Context, floorName string) (*model.Floor, error) {
