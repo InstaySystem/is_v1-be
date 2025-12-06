@@ -291,5 +291,9 @@ func (c *WSClient) getKey() string {
 	if c.Type == "guest" {
 		return fmt.Sprintf("guest_%d", c.ClientID)
 	}
-	return fmt.Sprintf("dept_%d", *c.DepartmentID)
+	if c.DepartmentID != nil {
+		return fmt.Sprintf("dept_%d", *c.DepartmentID)
+	}
+	
+	return "unknown"
 }
