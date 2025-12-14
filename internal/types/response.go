@@ -361,7 +361,7 @@ type SimpleMessageResponse struct {
 	Content    *string                 `json:"content"`
 	ImageKey   *string                 `json:"image_key"`
 	SenderType string                  `json:"sender_type"`
-	Sender     *BasicUserResponse      `json:"sender_id"`
+	Sender     *BasicUserResponse      `json:"sender"`
 	CreatedAt  time.Time               `json:"created_at"`
 	IsRead     bool                    `json:"is_read"`
 	ReadAt     *time.Time              `json:"read_at"`
@@ -373,7 +373,7 @@ type MessageResponse struct {
 	Content    *string                 `json:"content"`
 	ImageKey   *string                 `json:"image_key"`
 	SenderType string                  `json:"sender_type"`
-	Sender     *BasicUserResponse      `json:"sender_id"`
+	Sender     *BasicUserResponse      `json:"sender"`
 	CreatedAt  time.Time               `json:"created_at"`
 	IsRead     bool                    `json:"is_read"`
 	ReadAt     *time.Time              `json:"read_at"`
@@ -409,10 +409,9 @@ type BasicChatResponse struct {
 }
 
 type BasicChatWithMessageResponse struct {
-	ID         int64                     `json:"id"`
-	Department *SimpleDepartmentResponse `json:"department"`
-	ExpiredAt  time.Time                 `json:"expired_at"`
-	Messages   []*BasicMessageResponse   `json:"messages"`
+	ID        int64                   `json:"id"`
+	ExpiredAt time.Time               `json:"expired_at"`
+	Messages  []*BasicMessageResponse `json:"messages"`
 }
 
 type BasicMessageResponse struct {
@@ -444,7 +443,7 @@ type WSResponse struct {
 type UpdateReadMessagesResponse struct {
 	ChatID     int64              `json:"chat_id"`
 	ReaderType string             `json:"reader_type"`
-	ReadAt     time.Time          `json:"read_at"`
+	ReadAt     *time.Time          `json:"read_at"`
 	Reader     *BasicUserResponse `json:"reader"`
 }
 

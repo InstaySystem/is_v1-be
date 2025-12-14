@@ -9,7 +9,7 @@ func ToUserResponse(user *model.User) *types.UserResponse {
 	if user == nil {
 		return nil
 	}
-	
+
 	return &types.UserResponse{
 		ID:         user.ID,
 		Email:      user.Email,
@@ -1025,11 +1025,16 @@ func ToSimpleChatResponse(chat *model.Chat) *types.SimpleChatResponse {
 		return nil
 	}
 
+	var lastMessage *types.SimpleMessageResponse
+	if len(chat.Messages) > 0 {
+		lastMessage = ToSimpleMessageResponse(chat.Messages[0])
+	}
+
 	return &types.SimpleChatResponse{
 		ID:          chat.ID,
 		OrderRoom:   ToSimpleOrderRoomResponse(chat.OrderRoom),
 		ExpiredAt:   chat.ExpiredAt,
-		LastMessage: ToSimpleMessageResponse(chat.Messages[0]),
+		LastMessage: lastMessage,
 	}
 }
 

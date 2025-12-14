@@ -86,6 +86,7 @@ func (r *bookingRepoImpl) GetBookingCountBySource(ctx context.Context) ([]*types
 		Select("sources.name as label, COUNT(bookings.id) as value").
 		Joins("JOIN sources ON sources.id = bookings.source_id").
 		Group("sources.name").
+		Order("value ASC").
 		Scan(&results).Error
 	return results, err
 }

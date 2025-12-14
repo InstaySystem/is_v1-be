@@ -171,13 +171,18 @@ func (c *WSClient) handleMarkRead(content []byte) {
 		return
 	}
 
+	var reader *types.BasicUserResponse
+	if c.Type == "staff" && c.StaffData != nil {
+		reader = (*types.BasicUserResponse)(c.StaffData)
+	}
+
 	res := types.WSResponse{
 		Event: eventMarkRead,
 		Data: types.UpdateReadMessagesResponse{
 			ChatID:     req.ChatID,
 			ReaderType: c.Type,
-			ReadAt:     *chat.LastMessageAt,
-			Reader:     (*types.BasicUserResponse)(c.StaffData),
+			ReadAt:     chat.LastMessageAt,
+			Reader:     reader,
 		},
 	}
 
