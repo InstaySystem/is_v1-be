@@ -101,8 +101,9 @@ func (h *OrderHandler) VerifyOrderRoom(c *gin.Context) {
 		return
 	}
 
-	isSecure := c.Request.TLS != nil
+	isSecure := c.Request.TLS != nil || c.GetHeader("X-Forwarded-Proto") == "https"
 
+	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(h.guestName, guestToken, int(ttl.Seconds()), "/", "", isSecure, true)
 
 	common.ToAPIResponse(c, http.StatusOK, "Order room verification successful", nil)
