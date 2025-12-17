@@ -75,7 +75,7 @@ func NewServer(cfg *config.Config) (*Server, error) {
 	go ctn.WSHub.Run()
 
 	r := gin.Default()
-	_ = r.SetTrustedProxies(nil)
+	_ = r.SetTrustedProxies([]string{"0.0.0.0/0"})
 
 	corsConfig := cors.Config{
 		AllowOrigins:     cfg.Server.AllowOrigins,
