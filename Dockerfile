@@ -14,7 +14,7 @@ RUN go build -o main ./cmd/api
 
 FROM alpine:latest
 
-RUN apk --no-cache add curl ca-certificates tzdata
+RUN apk add --no-cache ca-certificates tzdata
 
 RUN adduser -D -u 1001 gin
 
@@ -25,6 +25,8 @@ RUN mkdir -p /app/logs && chown -R 1001:1001 /app
 COPY --from=builder /app/main .
 
 COPY --from=builder /app/configs ./configs
+
+USER gin
 
 EXPOSE 8080
 
