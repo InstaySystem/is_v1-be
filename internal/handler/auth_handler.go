@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/InstaySystem/is-be/internal/common"
-	"github.com/InstaySystem/is-be/internal/config"
-	"github.com/InstaySystem/is-be/internal/service"
-	"github.com/InstaySystem/is-be/internal/types"
+	"github.com/InstaySystem/is_v1-be/internal/common"
+	"github.com/InstaySystem/is_v1-be/internal/config"
+	"github.com/InstaySystem/is_v1-be/internal/service"
+	"github.com/InstaySystem/is_v1-be/internal/types"
 	"github.com/gin-gonic/gin"
 )
 

@@ -8,13 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/InstaySystem/is-be/internal/common"
-	"github.com/InstaySystem/is-be/internal/model"
-	"github.com/InstaySystem/is-be/internal/provider/mq"
-	"github.com/InstaySystem/is-be/internal/repository"
-	"github.com/InstaySystem/is-be/internal/service"
-	"github.com/InstaySystem/is-be/internal/types"
-	"github.com/InstaySystem/is-be/pkg/snowflake"
+	"github.com/InstaySystem/is_v1-be/internal/common"
+	"github.com/InstaySystem/is_v1-be/internal/model"
+	"github.com/InstaySystem/is_v1-be/internal/provider/mq"
+	"github.com/InstaySystem/is_v1-be/internal/repository"
+	"github.com/InstaySystem/is_v1-be/internal/service"
+	"github.com/InstaySystem/is_v1-be/internal/types"
+	"github.com/InstaySystem/is_v1-be/pkg/snowflake"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -403,7 +403,7 @@ func (s *requestSvcImpl) UpdateRequestForAdmin(ctx context.Context, departmentID
 		}
 
 		if request.OrderRoom.Booking.CheckOut.Before(time.Now()) {
-			return common.ErrBookingExpired 
+			return common.ErrBookingExpired
 		}
 
 		if (request.Status == "pending" && status != "accepted") || (request.Status == "accepted" && status != "done") {

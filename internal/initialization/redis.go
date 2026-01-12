@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 
-	"github.com/InstaySystem/is-be/internal/config"
+	"github.com/InstaySystem/is_v1-be/internal/config"
 	"github.com/redis/go-redis/v9"
 	"github.com/redis/go-redis/v9/maintnotifications"
 )

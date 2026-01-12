@@ -1,14 +1,14 @@
 package container
 
 import (
-	"github.com/InstaySystem/is-be/internal/config"
-	"github.com/InstaySystem/is-be/internal/handler"
-	"github.com/InstaySystem/is-be/internal/provider/cache"
-	"github.com/InstaySystem/is-be/internal/provider/jwt"
-	"github.com/InstaySystem/is-be/internal/provider/mq"
-	"github.com/InstaySystem/is-be/internal/repository"
-	svcImpl "github.com/InstaySystem/is-be/internal/service/implement"
-	"github.com/InstaySystem/is-be/pkg/bcrypt"
+	"github.com/InstaySystem/is_v1-be/internal/config"
+	"github.com/InstaySystem/is_v1-be/internal/handler"
+	"github.com/InstaySystem/is_v1-be/internal/provider/cache"
+	"github.com/InstaySystem/is_v1-be/internal/provider/jwt"
+	"github.com/InstaySystem/is_v1-be/internal/provider/mq"
+	"github.com/InstaySystem/is_v1-be/internal/repository"
+	svcImpl "github.com/InstaySystem/is_v1-be/internal/service/implement"
+	"github.com/InstaySystem/is_v1-be/pkg/bcrypt"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )

@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/InstaySystem/is-be/internal/common"
-	"github.com/InstaySystem/is-be/internal/model"
-	"github.com/InstaySystem/is-be/internal/repository"
-	"github.com/InstaySystem/is-be/internal/service"
-	"github.com/InstaySystem/is-be/internal/types"
-	"github.com/InstaySystem/is-be/pkg/snowflake"
+	"github.com/InstaySystem/is_v1-be/internal/common"
+	"github.com/InstaySystem/is_v1-be/internal/model"
+	"github.com/InstaySystem/is_v1-be/internal/repository"
+	"github.com/InstaySystem/is_v1-be/internal/service"
+	"github.com/InstaySystem/is_v1-be/internal/types"
+	"github.com/InstaySystem/is_v1-be/pkg/snowflake"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -18,7 +18,7 @@ type chatSvcImpl struct {
 	db        *gorm.DB
 	chatRepo  repository.ChatRepository
 	orderRepo repository.OrderRepository
-	userRepo repository.UserRepository
+	userRepo  repository.UserRepository
 	sfGen     snowflake.Generator
 	logger    *zap.Logger
 }
@@ -101,7 +101,7 @@ func (s *chatSvcImpl) CreateMessage(ctx context.Context, chatID, clientID int64,
 func (s *chatSvcImpl) UpdateReadMessages(ctx context.Context, chatID, clientID int64, readerType string) (*model.Chat, error) {
 	var chat *model.Chat
 	var err error
-	
+
 	if err = s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		now := time.Now()
 

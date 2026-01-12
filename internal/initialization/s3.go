@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/InstaySystem/is-be/internal/config"
+	"github.com/InstaySystem/is_v1-be/internal/config"
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"

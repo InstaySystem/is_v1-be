@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/InstaySystem/is-be/internal/common"
-	"github.com/InstaySystem/is-be/internal/model"
-	"github.com/InstaySystem/is-be/internal/repository"
-	"github.com/InstaySystem/is-be/internal/types"
+	"github.com/InstaySystem/is_v1-be/internal/common"
+	"github.com/InstaySystem/is_v1-be/internal/model"
+	"github.com/InstaySystem/is_v1-be/internal/repository"
+	"github.com/InstaySystem/is_v1-be/internal/types"
 	"gorm.io/gorm"
 )
 
@@ -43,7 +43,6 @@ func (r *requestRepoImpl) RequestStatusDistribution(ctx context.Context) ([]*typ
 
 	return results, nil
 }
-
 
 func (r *requestRepoImpl) FindAllRequestTypes(ctx context.Context) ([]*model.RequestType, error) {
 	var requestTypes []*model.RequestType

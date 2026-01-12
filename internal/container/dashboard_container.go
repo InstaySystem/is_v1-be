@@ -1,9 +1,9 @@
 package container
 
 import (
-	"github.com/InstaySystem/is-be/internal/handler"
-	"github.com/InstaySystem/is-be/internal/repository"
-	svcImpl "github.com/InstaySystem/is-be/internal/service/implement"
+	"github.com/InstaySystem/is_v1-be/internal/handler"
+	"github.com/InstaySystem/is_v1-be/internal/repository"
+	svcImpl "github.com/InstaySystem/is_v1-be/internal/service/implement"
 	"go.uber.org/zap"
 )
 
@@ -19,7 +19,7 @@ func NewDashboardContainer(
 	orderRepo repository.OrderRepository,
 	requestRepo repository.RequestRepository,
 	reviewRepo repository.ReviewRepository,
-	logger      *zap.Logger,
+	logger *zap.Logger,
 ) *DashboardContainer {
 	svc := svcImpl.NewDashboardService(userRepo, roomRepo, serviceRepo, bookingRepo, orderRepo, requestRepo, reviewRepo, logger)
 	hdl := handler.NewDashboardHandler(svc)

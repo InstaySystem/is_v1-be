@@ -6,10 +6,10 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/InstaySystem/is-be/internal/common"
-	"github.com/InstaySystem/is-be/internal/model"
-	"github.com/InstaySystem/is-be/internal/repository"
-	"github.com/InstaySystem/is-be/internal/types"
+	"github.com/InstaySystem/is_v1-be/internal/common"
+	"github.com/InstaySystem/is_v1-be/internal/model"
+	"github.com/InstaySystem/is_v1-be/internal/repository"
+	"github.com/InstaySystem/is_v1-be/internal/types"
 	"gorm.io/gorm"
 )
 
@@ -83,7 +83,7 @@ func (r *userRepoImpl) ExistsByEmail(ctx context.Context, email string) (bool, e
 	return count > 0, nil
 }
 
-func(r *userRepoImpl) Count(ctx context.Context) (int64, error) {
+func (r *userRepoImpl) Count(ctx context.Context) (int64, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&model.User{}).Count(&count).Error; err != nil {
 		return 0, err

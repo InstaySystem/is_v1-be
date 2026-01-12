@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	_ "github.com/InstaySystem/is-be/docs"
-	"github.com/InstaySystem/is-be/internal/config"
-	"github.com/InstaySystem/is-be/internal/server"
+	_ "github.com/InstaySystem/is_v1-be/docs"
+	"github.com/InstaySystem/is_v1-be/internal/config"
+	"github.com/InstaySystem/is_v1-be/internal/server"
 )
 
 // @title Instay API

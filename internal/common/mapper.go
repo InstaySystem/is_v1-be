@@ -1,8 +1,8 @@
 package common
 
 import (
-	"github.com/InstaySystem/is-be/internal/model"
-	"github.com/InstaySystem/is-be/internal/types"
+	"github.com/InstaySystem/is_v1-be/internal/model"
+	"github.com/InstaySystem/is_v1-be/internal/types"
 )
 
 func ToUserResponse(user *model.User) *types.UserResponse {

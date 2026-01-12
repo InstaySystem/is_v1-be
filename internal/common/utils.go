@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/InstaySystem/is-be/internal/types"
+	"github.com/InstaySystem/is_v1-be/internal/types"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/gosimple/slug"

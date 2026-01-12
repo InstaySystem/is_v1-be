@@ -7,8 +7,8 @@ import (
 	"html/template"
 	"net/smtp"
 
-	"github.com/InstaySystem/is-be/internal/config"
-	"github.com/InstaySystem/is-be/internal/types"
+	"github.com/InstaySystem/is_v1-be/internal/config"
+	"github.com/InstaySystem/is_v1-be/internal/types"
 )
 
 //go:embed templates/auth.html
@@ -16,7 +16,7 @@ var authTemplate embed.FS
 
 type SMTPProvider interface {
 	Send(to, subject, body string) error
-	
+
 	AuthEmail(to, subject, otp string) error
 }
 

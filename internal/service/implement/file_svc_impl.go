@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/InstaySystem/is-be/internal/common"
-	"github.com/InstaySystem/is-be/internal/config"
-	"github.com/InstaySystem/is-be/internal/service"
-	"github.com/InstaySystem/is-be/internal/types"
+	"github.com/InstaySystem/is_v1-be/internal/common"
+	"github.com/InstaySystem/is_v1-be/internal/config"
+	"github.com/InstaySystem/is_v1-be/internal/service"
+	"github.com/InstaySystem/is_v1-be/internal/types"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	s3Types "github.com/aws/aws-sdk-go-v2/service/s3/types"
@@ -41,7 +41,7 @@ func (s *fileSvcImpl) CreateUploadURLs(ctx context.Context, req types.UploadPres
 	for _, file := range req.Files {
 		name := strings.TrimSuffix(file.FileName, filepath.Ext(file.FileName))
 		ext := filepath.Ext(file.FileName)
-		
+
 		key := fmt.Sprintf("%s/%s-%s%s", s.cfg.S3.Folder, uuid.NewString(), common.GenerateSlug(name), ext)
 		presignedRes, err := s.presigner.PresignPutObject(ctx, &s3.PutObjectInput{
 			Bucket:      aws.String(s.cfg.S3.Bucket),

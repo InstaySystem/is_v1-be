@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/InstaySystem/is-be/internal/common"
+	"github.com/InstaySystem/is_v1-be/internal/common"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -74,9 +74,9 @@ func (j *jwtProviderImpl) ParseToken(tokenStr string) (int64, string, int64, err
 
 func (j *jwtProviderImpl) GenerateGuestToken(orderRoomID int64, ttl time.Duration) (string, error) {
 	claims := jwt.MapClaims{
-		"sub":  orderRoomID,
-		"exp":  time.Now().Add(ttl).Unix(),
-		"iat":  time.Now().Unix(),
+		"sub": orderRoomID,
+		"exp": time.Now().Add(ttl).Unix(),
+		"iat": time.Now().Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

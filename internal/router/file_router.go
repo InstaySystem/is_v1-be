@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/InstaySystem/is-be/internal/handler"
+	"github.com/InstaySystem/is_v1-be/internal/handler"
 	"github.com/gin-gonic/gin"
 )
 

@@ -3,7 +3,7 @@ package types
 import (
 	"time"
 
-	"github.com/InstaySystem/is-be/internal/model"
+	"github.com/InstaySystem/is_v1-be/internal/model"
 )
 
 type UserData struct {

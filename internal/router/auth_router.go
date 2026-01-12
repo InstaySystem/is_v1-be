@@ -1,8 +1,8 @@
 package router
 
 import (
-	"github.com/InstaySystem/is-be/internal/handler"
-	"github.com/InstaySystem/is-be/internal/middleware"
+	"github.com/InstaySystem/is_v1-be/internal/handler"
+	"github.com/InstaySystem/is_v1-be/internal/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,7 +10,7 @@ func AuthRouter(rg *gin.RouterGroup, hdl *handler.AuthHandler, authMid *middlewa
 	auth := rg.Group("/auth")
 	{
 		auth.POST("/login", hdl.Login)
-		
+
 		auth.POST("/logout", authMid.IsAuthentication(), hdl.Logout)
 
 		auth.POST("/refresh-token", authMid.HasRefreshToken(), hdl.RefreshToken)
@@ -27,4 +27,4 @@ func AuthRouter(rg *gin.RouterGroup, hdl *handler.AuthHandler, authMid *middlewa
 
 		auth.POST("/update-info", authMid.IsAuthentication(), hdl.UpdateInfo)
 	}
-} 
+}

@@ -5,9 +5,9 @@ import (
 	"math"
 	"time"
 
-	"github.com/InstaySystem/is-be/internal/repository"
-	"github.com/InstaySystem/is-be/internal/service"
-	"github.com/InstaySystem/is-be/internal/types"
+	"github.com/InstaySystem/is_v1-be/internal/repository"
+	"github.com/InstaySystem/is_v1-be/internal/service"
+	"github.com/InstaySystem/is_v1-be/internal/types"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 )

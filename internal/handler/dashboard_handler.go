@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/InstaySystem/is-be/internal/common"
-	"github.com/InstaySystem/is-be/internal/service"
+	"github.com/InstaySystem/is_v1-be/internal/common"
+	"github.com/InstaySystem/is_v1-be/internal/service"
 	"github.com/gin-gonic/gin"
 )
 

@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/InstaySystem/is-be/internal/types"
+	"github.com/InstaySystem/is_v1-be/internal/types"
 )
 
 type FileService interface {

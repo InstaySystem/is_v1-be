@@ -1,8 +1,8 @@
 package container
 
 import (
-	"github.com/InstaySystem/is-be/internal/handler"
-	"github.com/InstaySystem/is-be/internal/hub"
+	"github.com/InstaySystem/is_v1-be/internal/handler"
+	"github.com/InstaySystem/is_v1-be/internal/hub"
 )
 
 type WSContainer struct {
