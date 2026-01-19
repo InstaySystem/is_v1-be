@@ -63,6 +63,7 @@ type Config struct {
 		Region          string `mapstructure:"region"`
 		UseSSL          bool   `mapstructure:"use_ssl"`
 		Endpoint        string `mapstructure:"endpoint"`
+		PublicDomain    string `mapstructure:"public_domain"`
 	} `mapstructure:"s3"`
 
 	SMTP struct {
@@ -78,6 +79,12 @@ type Config struct {
 		User     string `mapstructure:"user"`
 		Password string `mapstructure:"password"`
 	} `mapstructure:"imap"`
+
+	Admin struct {
+		Username string `mapstructure:"username"`
+		Password string `mapstructure:"password"`
+		Email    string `mapstructure:"email"`
+	} `mapstructure:"admin"`
 }
 
 func LoadConfig() (*Config, error) {
@@ -107,6 +114,7 @@ func LoadConfig() (*Config, error) {
 	viper.BindEnv("s3.secret_access_key", "S3_SECRET_ACCESS_KEY")
 	viper.BindEnv("s3.use_ssl", "S3_USE_SSL")
 	viper.BindEnv("s3.region", "S3_REGION")
+	viper.BindEnv("s3.public_domain", "S3_PUBLIC_DOMAIN")
 
 	viper.BindEnv("smtp.host", "SMTP_HOST")
 	viper.BindEnv("smtp.port", "SMTP_PORT")
@@ -117,6 +125,10 @@ func LoadConfig() (*Config, error) {
 	viper.BindEnv("imap.port", "IMAP_PORT")
 	viper.BindEnv("imap.user", "IMAP_USER")
 	viper.BindEnv("imap.password", "IMAP_PASSWORD")
+
+	viper.BindEnv("admin.username", "AD_USERNAME")
+	viper.BindEnv("admin.password", "AD_PASSWORD")
+	viper.BindEnv("admin.email", "AD_EMAIL")
 
 	viper.BindEnv("jwt.access_name", "JWT_ACCESS_NAME")
 	viper.BindEnv("jwt.refresh_name", "JWT_REFRESH_NAME")

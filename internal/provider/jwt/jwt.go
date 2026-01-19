@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/InstaySystem/is_v1-be/internal/common"
@@ -28,7 +29,7 @@ func NewJWTProvider(secret string) JWTProvider {
 
 func (j *jwtProviderImpl) GenerateToken(userID int64, userRole string, ttl time.Duration) (string, error) {
 	claims := jwt.MapClaims{
-		"sub":  userID,
+		"sub":  strconv.FormatInt(userID, 10),
 		"role": userRole,
 		"exp":  time.Now().Add(ttl).Unix(),
 		"iat":  time.Now().Unix(),
@@ -54,8 +55,13 @@ func (j *jwtProviderImpl) ParseToken(tokenStr string) (int64, string, int64, err
 		return 0, "", 0, common.ErrInvalidToken
 	}
 
-	idFloat, ok := claims["sub"].(float64)
+	subStr, ok := claims["sub"].(string)
 	if !ok {
+		return 0, "", 0, common.ErrInvalidToken
+	}
+
+	userID, err := strconv.ParseInt(subStr, 10, 64)
+	if err != nil {
 		return 0, "", 0, common.ErrInvalidToken
 	}
 
@@ -69,7 +75,7 @@ func (j *jwtProviderImpl) ParseToken(tokenStr string) (int64, string, int64, err
 		return 0, "", 0, common.ErrInvalidToken
 	}
 
-	return int64(idFloat), role, int64(iatFloat), nil
+	return userID, role, int64(iatFloat), nil
 }
 
 func (j *jwtProviderImpl) GenerateGuestToken(orderRoomID int64, ttl time.Duration) (string, error) {

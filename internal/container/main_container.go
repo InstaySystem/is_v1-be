@@ -41,7 +41,9 @@ type Container struct {
 	SMTPProvider    smtp.SMTPProvider
 	MQProvider      mq.MessageQueueProvider
 	SfGen           snowflake.Generator
+	BHash           bcrypt.Hasher
 	BookingRepo     repository.BookingRepository
+	UserRepo        repository.UserRepository
 	SSEHub          *hub.SSEHub
 	WSHub           *hub.WSHub
 }
@@ -53,14 +55,13 @@ func NewContainer(
 	s3 *initialization.S3,
 	sf *sonyflake.Sonyflake,
 	logger *zap.Logger,
-	mqConn *amqp091.Connection,
-	mqChan *amqp091.Channel,
+	rmq *amqp091.Connection,
 ) *Container {
 	sfGen := snowflake.NewGenerator(sf)
 	bHash := bcrypt.NewHasher(10)
 	jwtProvider := jwt.NewJWTProvider(cfg.JWT.SecretKey)
 	smtpProvider := smtp.NewSMTPProvider(cfg)
-	mqProvider := mq.NewMessageQueueProvider(mqConn, mqChan, logger)
+	mqProvider := mq.NewMessageQueueProvider(rmq, logger)
 	cacheProvider := cache.NewCacheProvider(rdb)
 	sseHub := hub.NewSSEHub()
 
@@ -116,7 +117,9 @@ func NewContainer(
 		smtpProvider,
 		mqProvider,
 		sfGen,
+		bHash,
 		bookingRepo,
+		userRepo,
 		sseHub,
 		wsHub,
 	}

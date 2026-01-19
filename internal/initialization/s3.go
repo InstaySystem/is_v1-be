@@ -46,13 +46,19 @@ func InitS3(cfg *config.Config) (*S3, error) {
 
 	protocol := "http"
 	if cfg.S3.UseSSL {
-		protocol = protocol + "s"
+		protocol += "s"
 	}
+	internalEndpoint := fmt.Sprintf("%s://%s", protocol, cfg.S3.Endpoint)
 	client := s3.NewFromConfig(awsCfg, func(o *s3.Options) {
 		o.UsePathStyle = true
-		o.BaseEndpoint = aws.String(fmt.Sprintf("%s://%s", protocol, cfg.S3.Endpoint))
+		o.BaseEndpoint = aws.String(internalEndpoint)
 	})
-	presigner := s3.NewPresignClient(client)
+
+	presignClient := s3.NewFromConfig(awsCfg, func(o *s3.Options) {
+		o.UsePathStyle = true
+		o.BaseEndpoint = aws.String(cfg.S3.PublicDomain)
+	})
+	presigner := s3.NewPresignClient(presignClient)
 
 	return &S3{
 		client,

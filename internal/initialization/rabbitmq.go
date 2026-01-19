@@ -7,15 +7,10 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 )
 
-type MQ struct {
-	Conn *amqp091.Connection
-	Chan *amqp091.Channel
-}
-
-func InitRabbitMQ(cfg *config.Config) (*MQ, error) {
+func InitRabbitMQ(cfg *config.Config) (*amqp091.Connection, error) {
 	protocol := "amqp"
 	if cfg.RabbitMQ.UseSSL {
-		protocol = protocol + "s"
+		protocol += "s"
 	}
 
 	dsn := fmt.Sprintf("%s://%s:%s@%s:%d/%s",
@@ -32,18 +27,6 @@ func InitRabbitMQ(cfg *config.Config) (*MQ, error) {
 		return nil, fmt.Errorf("message queue - %w", err)
 	}
 
-	chann, err := conn.Channel()
-	if err != nil {
-		return nil, fmt.Errorf("message queue - %w", err)
-	}
-
-	return &MQ{
-		conn,
-		chann,
-	}, nil
+	return conn, nil
 }
 
-func (mq *MQ) Close() {
-	_ = mq.Chan.Close()
-	_ = mq.Conn.Close()
-}

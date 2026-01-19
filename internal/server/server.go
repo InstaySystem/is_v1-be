@@ -13,9 +13,11 @@ import (
 	"github.com/InstaySystem/is_v1-be/internal/container"
 	"github.com/InstaySystem/is_v1-be/internal/initialization"
 	"github.com/InstaySystem/is_v1-be/internal/router"
+	"github.com/InstaySystem/is_v1-be/internal/seed"
 	"github.com/InstaySystem/is_v1-be/internal/worker"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/rabbitmq/amqp091-go"
 	"github.com/redis/go-redis/v9"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -27,7 +29,7 @@ type Server struct {
 	http         *http.Server
 	db           *initialization.DB
 	rdb          *redis.Client
-	mq           *initialization.MQ
+	rmq          *amqp091.Connection
 	listenWorker *worker.ListenWorker
 	logger       *zap.Logger
 }
@@ -43,7 +45,7 @@ func NewServer(cfg *config.Config) (*Server, error) {
 		return nil, err
 	}
 
-	mq, err := initialization.InitRabbitMQ(cfg)
+	rmq, err := initialization.InitRabbitMQ(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +65,12 @@ func NewServer(cfg *config.Config) (*Server, error) {
 		return nil, err
 	}
 
-	ctn := container.NewContainer(cfg, db.Gorm, rdb, s3, sf, logger, mq.Conn, mq.Chan)
+	ctn := container.NewContainer(cfg, db.Gorm, rdb, s3, sf, logger, rmq)
+
+	seed := seed.NewSeed(cfg, ctn.UserRepo, logger, ctn.BHash, ctn.SfGen)
+	if err = seed.AdminSeed(); err != nil {
+		return nil, err
+	}
 
 	mqWorker := worker.NewMQWorker(cfg, ctn.MQProvider, ctn.SMTPProvider, s3.Client, logger, ctn.SSEHub)
 	mqWorker.Start()
@@ -129,7 +136,7 @@ func NewServer(cfg *config.Config) (*Server, error) {
 		http,
 		db,
 		rdb,
-		mq,
+		rmq,
 		listenWorker,
 		logger,
 	}, nil
@@ -152,8 +159,8 @@ func (s *Server) Shutdown(ctx context.Context) {
 		s.rdb.Close()
 	}
 
-	if s.mq != nil {
-		s.mq.Close()
+	if s.rmq != nil {
+		s.rmq.Close()
 	}
 
 	if s.logger != nil {

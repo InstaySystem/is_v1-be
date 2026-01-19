@@ -27,4 +27,6 @@ type UserRepository interface {
 	CountActiveAdminExceptID(ctx context.Context, id int64) (int64, error)
 
 	Count(ctx context.Context) (int64, error)
+
+	ExistsActiveAdmin(ctx context.Context) (bool, error)
 }

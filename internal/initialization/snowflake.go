@@ -9,7 +9,7 @@ import (
 
 func InitSnowFlake() (*sonyflake.Sonyflake, error) {
 	st := sonyflake.Settings{
-		StartTime: time.Date(2025, 11, 2, 0, 0, 0, 0, time.UTC),
+		StartTime: time.Date(2026, 1, 18, 0, 0, 0, 0, time.UTC),
 		MachineID: func() (int, error) {
 			return 1, nil
 		},

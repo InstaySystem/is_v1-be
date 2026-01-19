@@ -17,27 +17,30 @@ type MessageQueueProvider interface {
 
 type messageQueueProviderImpl struct {
 	conn   *amqp091.Connection
-	ch     *amqp091.Channel
 	logger *zap.Logger
 }
 
 func NewMessageQueueProvider(
 	conn *amqp091.Connection,
-	ch *amqp091.Channel,
 	logger *zap.Logger,
 ) MessageQueueProvider {
 	return &messageQueueProviderImpl{
 		conn,
-		ch,
 		logger,
 	}
 }
 
 func (m *messageQueueProviderImpl) PublishMessage(exchange, routingKey string, body []byte) error {
+	ch, err := m.conn.Channel()
+	if err != nil {
+		return fmt.Errorf("failed to open channel: %w", err)
+	}
+	defer ch.Close()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := m.ch.PublishWithContext(ctx, exchange, routingKey, false, false, amqp091.Publishing{
+	if err := ch.PublishWithContext(ctx, exchange, routingKey, false, false, amqp091.Publishing{
 		ContentType:  "application/json",
 		DeliveryMode: amqp091.Persistent,
 		Body:         body,
@@ -49,23 +52,28 @@ func (m *messageQueueProviderImpl) PublishMessage(exchange, routingKey string, b
 }
 
 func (m *messageQueueProviderImpl) ConsumeMessage(queueName, exchange, routingKey string, handler func([]byte) error) error {
-	if _, err := m.ch.QueueDeclare(queueName, true, false, false, false, nil); err != nil {
+	ch, err := m.conn.Channel()
+	if err != nil {
+		return fmt.Errorf("failed to open channel for consumer: %w", err)
+	}
+
+	if _, err := ch.QueueDeclare(queueName, true, false, false, false, nil); err != nil {
 		return err
 	}
 
-	if err := m.ch.ExchangeDeclare(exchange, "direct", true, false, false, false, nil); err != nil {
+	if err := ch.ExchangeDeclare(exchange, "direct", true, false, false, false, nil); err != nil {
 		return err
 	}
 
-	if err := m.ch.QueueBind(queueName, routingKey, exchange, false, nil); err != nil {
+	if err := ch.QueueBind(queueName, routingKey, exchange, false, nil); err != nil {
 		return err
 	}
 
-	if err := m.ch.Qos(5, 0, false); err != nil {
+	if err := ch.Qos(5, 0, false); err != nil {
 		return err
 	}
 
-	msgs, err := m.ch.Consume(queueName, "", true, false, false, false, nil)
+	msgs, err := ch.Consume(queueName, "", true, false, false, false, nil)
 	if err != nil {
 		return err
 	}
