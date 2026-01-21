@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/InstaySystem/is_v1-be/internal/common"
@@ -13,6 +14,7 @@ import (
 	"github.com/InstaySystem/is_v1-be/internal/types"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsS3 "github.com/aws/aws-sdk-go-v2/service/s3"
+	s3Types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"go.uber.org/zap"
 )
 
@@ -78,7 +80,10 @@ func (w *MQWorker) startDeleteFile() {
 			Bucket: aws.String(w.cfg.S3.Bucket),
 			Key:    aws.String(key),
 		}); err != nil {
-			w.logger.Error("file check failed", zap.Error(err))
+			var keyNotFound *s3Types.NotFound
+			if !errors.As(err, &keyNotFound) {
+				w.logger.Error("file check failed", zap.Error(err))
+			}
 		}
 
 		if _, err := w.s3.DeleteObject(ctx, &awsS3.DeleteObjectInput{
