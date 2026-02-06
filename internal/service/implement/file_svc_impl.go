@@ -2,7 +2,6 @@ package implement
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -14,7 +13,6 @@ import (
 	"github.com/InstaySystem/is_v1-be/internal/types"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	s3Types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
@@ -68,19 +66,6 @@ func (s *fileSvcImpl) CreateViewURLs(ctx context.Context, req types.ViewPresigne
 	result := make([]*types.ViewPresignedURLResponse, 0, len(req.Keys))
 
 	for _, key := range req.Keys {
-		if _, err := s.client.HeadObject(ctx, &s3.HeadObjectInput{
-			Bucket: aws.String(s.cfg.S3.Bucket),
-			Key:    aws.String(key),
-		}); err != nil {
-			var keyNotFound *s3Types.NotFound
-			if errors.As(err, &keyNotFound) {
-				result = append(result, nil)
-				continue
-			}
-			s.logger.Error("file check failed", zap.Error(err))
-			return nil, err
-		}
-
 		presignedReq, err := s.presigner.PresignGetObject(ctx, &s3.GetObjectInput{
 			Bucket: aws.String(s.cfg.S3.Bucket),
 			Key:    aws.String(key),
